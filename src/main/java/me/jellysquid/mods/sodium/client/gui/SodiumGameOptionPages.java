@@ -336,6 +336,18 @@ public class SodiumGameOptionPages {
                 )
                 .build());
 
+        groups.add(OptionGroup.createBuilder()
+                .add(OptionImpl.createBuilder(int.class, sodiumOpts)
+                        .setName(new TranslatableText("sodium.options.chunk_update_threads.name").getString())
+                        .setTooltip(new TranslatableText("sodium.options.chunk_update_threads.tooltip").getString())
+                        .setControl(o -> new SliderControl(o, 0, Runtime.getRuntime().availableProcessors(), 1, ControlValueFormatter.quantityOrDisabled("threads", "Default")))
+                        .setImpact(OptionImpact.HIGH)
+                        .setBinding((opts, value) -> opts.advanced.chunkBuilderThreads = value, opts -> opts.advanced.chunkBuilderThreads)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build()
+                )
+                .build());
+
         return new OptionPage(new TranslatableText("sodium.options.pages.advanced").getString(), ImmutableList.copyOf(groups));
     }
 }

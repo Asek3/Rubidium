@@ -33,6 +33,7 @@ public class SodiumGameOptions {
         public boolean useBlockFaceCulling = true;
         public boolean allowDirectMemoryAccess = true;
         public boolean ignoreDriverBlacklist = false;
+        public int chunkBuilderThreads = 0;
     }
 
     public static class QualitySettings {
