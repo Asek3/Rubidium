@@ -34,6 +34,7 @@ public class SodiumGameOptions {
         public boolean allowDirectMemoryAccess = true;
         public boolean ignoreDriverBlacklist = false;
         public int chunkBuilderThreads = 0;
+        public boolean alwaysDeferChunkUpdates = false;
     }
 
     public static class QualitySettings {

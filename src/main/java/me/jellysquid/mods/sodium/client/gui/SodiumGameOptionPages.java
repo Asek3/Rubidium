@@ -346,6 +346,14 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build()
                 )
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName(new TranslatableText("sodium.options.always_defer_chunk_updates.name").toString())
+                        .setTooltip(new TranslatableText("sodium.options.always_defer_chunk_updates.tooltip").toString())
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.HIGH)
+                        .setBinding((opts, value) -> opts.advanced.alwaysDeferChunkUpdates = value, opts -> opts.advanced.alwaysDeferChunkUpdates)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
                 .build());
 
         return new OptionPage(new TranslatableText("sodium.options.pages.advanced").getString(), ImmutableList.copyOf(groups));
