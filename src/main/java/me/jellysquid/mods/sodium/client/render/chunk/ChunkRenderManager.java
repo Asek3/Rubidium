@@ -132,7 +132,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         this.cameraZ = (float) cameraPos.z;
 
         this.useFogCulling = false;
-        this.alwaysDeferChunkUpdates = SodiumClientMod.options().advanced.alwaysDeferChunkUpdates;
+        this.alwaysDeferChunkUpdates = SodiumClientMod.options().performance.alwaysDeferChunkUpdates;
 
         if (SodiumClientMod.options().advanced.useFogOcclusion) {
             float dist = LegacyFogHelper.getFogCutoff() + FOG_PLANE_OFFSET;
