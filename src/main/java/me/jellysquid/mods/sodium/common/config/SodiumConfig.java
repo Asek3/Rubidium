@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import net.minecraftforge.fml.loading.LoadingModList;
+
 /**
  * Documentation of these options: https://github.com/jellysquid3/sodium-fabric/wiki/Configuration-File
  */
@@ -105,28 +107,27 @@ public class SodiumConfig {
         // ...
         for (var meta : LoadingModList.get().getMods()) {
             meta.getConfigElement(JSON_KEY_SODIUM_OPTIONS).ifPresent(overridesObj -> {
-                if (!(overridesObj instanceof Map overrides) || !overrides.keySet().stream().allMatch(key -> key instanceof String)) {
-                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getId());
-                    continue;
-                }
-
-                for (var entry : overrides.entrySet()) {
-                    this.applyModOverride(meta, (String)entry.getKey(), entry.getValue());
+                if (overridesObj instanceof Map overrides && overrides.keySet().stream().allMatch(key -> key instanceof String)) {
+                    overrides.forEach((key, value) -> {
+                        this.applyModOverride(meta.getModId(), (String)key, value);
+                    });
+                } else {
+                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getModId());
                 }
             });
         }
     }
 
-    private void applyModOverride(ModMetadata meta, String name, Object value) {
+    private void applyModOverride(String modid, String name, Object value) {
         Option option = this.options.get(name);
 
         if (option == null) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", meta.getId(), name);
+            LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", modid, name);
             return;
         }
 
         if (!(value instanceof Boolean enabled)) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", meta.getId(), name);
+            LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", modid, name);
             return;
         }
 
@@ -136,7 +137,7 @@ public class SodiumConfig {
         }
 
         if (!enabled || option.isEnabled() || option.getDefiningMods().isEmpty()) {
-            option.addModOverride(enabled, meta.getId());
+            option.addModOverride(enabled, modid);
         }
     }
 
