@@ -124,7 +124,7 @@ public class SodiumConfig {
             LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", meta.getId(), name);
             return;
         }
-        
+
         if (!(value instanceof Boolean enabled)) {
             LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", meta.getId(), name);
             return;
