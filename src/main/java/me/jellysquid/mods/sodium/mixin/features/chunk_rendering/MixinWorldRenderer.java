@@ -33,7 +33,6 @@ public abstract class MixinWorldRenderer {
 
     private SodiumWorldRenderer renderer;
 
-    //OK, Forge Loom don't remapping that shit
     @Redirect(method = "reload()V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;viewDistance:I", ordinal = 1))
     private int nullifyBuiltChunkStorage(GameOptions options) {
         // Do not allow any resources to be allocated
