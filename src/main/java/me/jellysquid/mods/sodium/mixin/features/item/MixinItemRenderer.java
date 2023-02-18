@@ -105,6 +105,13 @@ public class MixinItemRenderer {
     }
     
     private int multARGBInts(int colorA, int colorB) {
+        // Most common case: Either quad coloring or tint-based coloring, but not both
+        if (colorA == -1) {
+            return colorB;
+        } else if (colorB == -1) {
+            return colorA;
+        }
+        // General case (rare): Both colorings, actually perform the multiplication
         int a = (int)((ColorARGB.unpackAlpha(colorA)/255.0f) * (ColorARGB.unpackAlpha(colorB)/255.0f) * 255.0f);
         int b = (int)((ColorARGB.unpackBlue(colorA)/255.0f) * (ColorARGB.unpackBlue(colorB)/255.0f) * 255.0f);
         int g = (int)((ColorARGB.unpackGreen(colorA)/255.0f) * (ColorARGB.unpackGreen(colorB)/255.0f) * 255.0f);
