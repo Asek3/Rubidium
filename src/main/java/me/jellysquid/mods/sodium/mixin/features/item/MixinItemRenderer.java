@@ -93,13 +93,7 @@ public class MixinItemRenderer {
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-            	int fColor = color;
-                try {
-                    if (bakedQuad.hasColor()) {
-                    	fColor = multARGBInts(quad.getColor(quad.getColorIndex()), color);
-                    }
-                } catch (Exception ex) {
-                }
+                int fColor = multARGBInts(quad.getColor(i), color);
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
