@@ -103,7 +103,8 @@ public class SodiumConfig {
         // ...
         // [[mods]]
         // modId="examplemod"
-        // "sodium:options"."features.chunk_rendering"=false
+        // [mods."sodium:options"]
+        // "features.chunk_rendering"=false
         // ...
         for (var meta : LoadingModList.get().getMods()) {
             meta.getConfigElement(JSON_KEY_SODIUM_OPTIONS).ifPresent(overridesObj -> {
