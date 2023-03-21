@@ -1,9 +1,14 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
-import it.unimi.dsi.fastutil.longs.*;
-import net.minecraft.util.math.ChunkPos;
-
 import java.util.stream.LongStream;
+
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.util.math.ChunkPos;
 
 public class ChunkTracker {
     private final Long2IntOpenHashMap single = new Long2IntOpenHashMap();
@@ -88,11 +93,10 @@ public class ChunkTracker {
         var key = ChunkPos.toLong(x, z);
         var existingFlags = this.single.get(key);
 
-        if ((existingFlags & ChunkStatus.FLAG_HAS_BLOCK_DATA) == 0) {
-        	// Why is it so necessary to throw Exception
-            //throw new IllegalStateException("Tried to mark light data as ready for chunk [%s, %s] but it hasn't been loaded yet".formatted(x, z));
-        	return;
-        }
+        // Useless
+        /*if ((existingFlags & ChunkStatus.FLAG_HAS_BLOCK_DATA) == 0) {
+            SodiumClientMod.logger().warn("Tried to mark light data as ready for chunk [%s, %s] but it hasn't been loaded yet".formatted(x, z));
+        }*/
 
         this.single.put(key, existingFlags | ChunkStatus.FLAG_HAS_LIGHT_DATA);
         this.dirty.add(key);

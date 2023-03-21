@@ -1,5 +1,9 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
@@ -17,11 +21,14 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.*;
-
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkNibbleArray;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.IdListPalette;
+import net.minecraft.world.chunk.Palette;
+import net.minecraft.world.chunk.PalettedContainer;
+import net.minecraft.world.chunk.ReadableContainer;
+import net.minecraft.world.chunk.WorldChunk;
 
 public class ClonedChunkSection {
     private static final LightType[] LIGHT_TYPES = LightType.values();
@@ -50,7 +57,8 @@ public class ClonedChunkSection {
     }
 
     public void init(World world, ChunkSectionPos pos) {
-    	EMPTY_SECTION =  new ChunkSection(0, world.getRegistryManager().get(RegistryKeys.BIOME));
+        EMPTY_SECTION =  new ChunkSection(0, world.getRegistryManager().get(RegistryKeys.BIOME));
+
         WorldChunk chunk = world.getChunk(pos.getX(), pos.getZ());
 
         if (chunk == null) {
@@ -100,7 +108,7 @@ public class ClonedChunkSection {
     }
 
     private void copyBiomeData(ChunkSection section) {
-    	this.biomeData = section.getBiomeContainer();
+        this.biomeData = section.getBiomeContainer();
     }
 
     public int getLightLevel(LightType type, int x, int y, int z) {
@@ -126,16 +134,6 @@ public class ClonedChunkSection {
                 this.blockEntities.put(ChunkSectionPos.packLocal(pos), entity);
             }
         }
-
-        // Retrieve any render attachments after we have copied all block entities, as this will call into the code of
-        // other mods. This could potentially result in the chunk being modified, which would cause problems if we
-        // were iterating over any data in that chunk.
-        // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
-        /*for (Short2ObjectMap.Entry<BlockEntity> entry : Short2ObjectMaps.fastIterable(this.blockEntities)) {
-            if (entry.getValue() instanceof RenderAttachmentBlockEntity entity) {
-                this.renderAttachments.put(entry.getShortKey(), entity.getRenderAttachmentData());
-            }
-        }*/
     }
 
     public RegistryEntry<Biome> getBiome(int x, int y, int z) {

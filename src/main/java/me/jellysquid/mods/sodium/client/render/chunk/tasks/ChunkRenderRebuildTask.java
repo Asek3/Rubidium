@@ -1,7 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -10,11 +8,11 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderBounds;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderCache;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.coderbot.iris.compat.sodium.impl.block_context.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -63,7 +61,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         ChunkBuildBuffers buffers = buildContext.buffers;
         buffers.init(renderData, this.render.getChunkId());
 
-        ChunkRenderCacheLocal cache = buildContext.cache;
+        BlockRenderCache cache = buildContext.cache;
         cache.init(this.renderContext);
 
         WorldSlice slice = cache.getWorldSlice();
@@ -75,11 +73,13 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         int maxX = minX + 16;
         int maxY = minY + 16;
         int maxZ = minZ + 16;
-
-        Map<BlockPos, ModelData> modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+        
+        Map<BlockPos, ModelData> modelDataMap = slice.world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
 
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
-        BlockPos.Mutable offset = new BlockPos.Mutable();
+        BlockPos.Mutable modelOffset = new BlockPos.Mutable();
+
+        BlockRenderContext context = new BlockRenderContext(slice);
 
         for (int y = minY; y < maxY; y++) {
             if (cancellationSource.isCancelled()) {
@@ -95,34 +95,32 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     }
 
                     blockPos.set(x, y, z);
-                    offset.set(x & 15, y & 15, z & 15);
+                    modelOffset.set(x & 15, y & 15, z & 15);
 
-                    boolean rendered = false;
+                    var rendered = false;
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    	BakedModel model = cache.getBlockModels()
+                        BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
-                    	ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
-                    	random.setSeed(blockState.getRenderingSeed(blockPos));
+                        ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                        random.setSeed(blockState.getRenderingSeed(blockPos));
                         for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
-                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
-                            }
-
-                            long seed = blockState.getRenderingSeed(blockPos);
-
-                            if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
-                                rendered = true;
-                            }
-                    	}
+	                        long seed = blockState.getRenderingSeed(blockPos);
+	
+	                        context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
+	
+	                        if (cache.getBlockRenderer().renderModel(context, buffers.get(layer))) {
+	                            rendered = true;
+	                        }
+                        }
                     }
 
                     FluidState fluidState = blockState.getFluidState();
-                    
+
                     if (!fluidState.isEmpty()) {
                         RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
-                        
-                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
+
+                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, modelOffset, buffers.get(layer))) {
                             rendered = true;
                         }
                     }
@@ -135,7 +133,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
                             if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
-                                rendered = true;
                             }
                         }
                     }
@@ -152,11 +149,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         }
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
-        
-        if(SodiumClientMod.immersiveLoaded)
-	        ImmersiveConnectionRenderer.renderConnectionsInSection(
-	                buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
-	    );
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);
@@ -170,5 +162,10 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
+    }
+
+    @Override
+    public void releaseResources() {
+        this.renderContext.releaseResources();
     }
 }

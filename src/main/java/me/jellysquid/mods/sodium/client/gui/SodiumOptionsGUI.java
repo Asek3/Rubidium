@@ -172,7 +172,10 @@ public class SodiumOptionsGUI extends Screen {
         ControlElement<?> hovered = this.getActiveControls()
                 .filter(ControlElement::isHovered)
                 .findFirst()
-                .orElse(null);
+                .orElse(this.getActiveControls() // If there is no hovered element, use the focused element.
+                        .filter(ControlElement::isFocused)
+                        .findFirst()
+                        .orElse(null));
 
         boolean hasChanges = this.getAllOptions()
                 .anyMatch(Option::hasChanged);
@@ -231,7 +234,7 @@ public class SodiumOptionsGUI extends Screen {
             boxY -= boxYLimit - boxYCutoff;
         }
 
-        this.fillGradient(matrixStack, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
+        fillGradient(matrixStack, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000, 0xE0000000);
 
         for (int i = 0; i < tooltip.size(); i++) {
             this.textRenderer.draw(matrixStack, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
@@ -262,7 +265,7 @@ public class SodiumOptionsGUI extends Screen {
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
-        	client.setMipmapLevels(client.options.getMipmapLevels().getValue());
+            client.setMipmapLevels(client.options.getMipmapLevels().getValue());
             client.reloadResourcesConcurrently();
         }
 

@@ -8,14 +8,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
-import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphIterationQueue;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
@@ -103,12 +102,12 @@ public class RenderSectionManager {
     private final ChunkTracker tracker;
 
     public RenderSectionManager(SodiumWorldRenderer worldRenderer, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance, CommandList commandList) {
-        this.chunkRenderer = new RegionChunkRenderer(RenderDevice.INSTANCE, ChunkModelVertexFormats.DEFAULT);
+        this.chunkRenderer = new RegionChunkRenderer(RenderDevice.INSTANCE, ChunkModelVertexFormats.COMPACT);
 
         this.worldRenderer = worldRenderer;
         this.world = world;
 
-        this.builder = new ChunkBuilder(ChunkModelVertexFormats.DEFAULT);
+        this.builder = new ChunkBuilder(ChunkModelVertexFormats.COMPACT);
         this.builder.init(world, renderPassManager);
 
         this.needsUpdate = true;
@@ -256,11 +255,7 @@ public class RenderSectionManager {
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
         if (section.isEmpty()) {
-        	if(!SodiumClientMod.immersiveLoaded) {
-        		render.setData(ChunkRenderData.EMPTY);
-        	}else if(!ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z))) {
-        		render.setData(ChunkRenderData.EMPTY);
-        	}
+            render.setData(ChunkRenderData.EMPTY);
         } else {
             render.markForUpdate(ChunkUpdateType.INITIAL_BUILD);
         }
@@ -314,10 +309,22 @@ public class RenderSectionManager {
     }
 
     public void updateChunks() {
-        var blockingFutures = this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD);
+        updateChunks(false);
+    }
 
-        this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD);
-        this.submitRebuildTasks(ChunkUpdateType.REBUILD);
+    public void updateAllChunksNow() {
+        updateChunks(true);
+
+        // Also wait for any rebuilds which had already been scheduled before this method was called
+        this.needsUpdate |= this.performAllUploads();
+    }
+
+    private void updateChunks(boolean allImmediately) {
+        var blockingFutures = new LinkedList<CompletableFuture<ChunkBuildResult>>();
+
+        this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD, blockingFutures);
+        this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD, allImmediately ? blockingFutures : null);
+        this.submitRebuildTasks(ChunkUpdateType.REBUILD, allImmediately ? blockingFutures : null);
 
         // Try to complete some other work on the main thread while we wait for rebuilds to complete
         this.needsUpdate |= this.performPendingUploads();
@@ -330,10 +337,9 @@ public class RenderSectionManager {
         this.regions.cleanup();
     }
 
-    private LinkedList<CompletableFuture<ChunkBuildResult>> submitRebuildTasks(ChunkUpdateType filterType) {
-        int budget = filterType.isImportant() ? Integer.MAX_VALUE : this.builder.getSchedulingBudget();
+    private void submitRebuildTasks(ChunkUpdateType filterType, LinkedList<CompletableFuture<ChunkBuildResult>> immediateFutures) {
+        int budget = immediateFutures != null ? Integer.MAX_VALUE : this.builder.getSchedulingBudget();
 
-        LinkedList<CompletableFuture<ChunkBuildResult>> immediateFutures = new LinkedList<>();
         PriorityQueue<RenderSection> queue = this.rebuildQueues.get(filterType);
 
         while (budget > 0 && !queue.isEmpty()) {
@@ -352,7 +358,7 @@ public class RenderSectionManager {
             ChunkRenderBuildTask task = this.createRebuildTask(section);
             CompletableFuture<?> future;
 
-            if (filterType.isImportant()) {
+            if (immediateFutures != null) {
                 CompletableFuture<ChunkBuildResult> immediateFuture = this.builder.schedule(task);
                 immediateFutures.add(immediateFuture);
 
@@ -365,8 +371,6 @@ public class RenderSectionManager {
 
             budget--;
         }
-
-        return immediateFutures;
     }
 
     private boolean performPendingUploads() {
@@ -381,14 +385,44 @@ public class RenderSectionManager {
         return true;
     }
 
+    /**
+     * Processes all build task uploads, blocking for tasks to complete if necessary.
+     */
+    private boolean performAllUploads() {
+        boolean anythingUploaded = false;
+
+        while (true) {
+            // First check if all tasks are done building (and therefore the upload queue is final)
+            boolean allTasksBuilt = this.builder.isIdle();
+
+            // Then process the entire upload queue
+            anythingUploaded |= this.performPendingUploads();
+
+            // If the upload queue was the final one
+            if (allTasksBuilt) {
+                // then we are done
+                return anythingUploaded;
+            } else {
+                // otherwise we need to wait for the worker threads to make progress
+                try {
+                    // This code path is not the default one, it doesn't need super high performance, and having the
+                    // workers notify the main thread just for it is probably not worth it.
+                    //noinspection BusyWait
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return true;
+                }
+            }
+        }
+    }
+
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {
         ChunkRenderContext context = WorldSlice.prepare(this.world, render.getChunkPos(), this.sectionCache);
         int frame = this.currentFrame;
 
         if (context == null) {
-        	return SodiumClientMod.immersiveLoaded ? ImmersiveEmptyChunkChecker.makeEmptyRebuildTask(
-                    sectionCache, render.getChunkPos(), render, currentFrame
-            ) : new ChunkRenderEmptyBuildTask(render, frame);
+            return new ChunkRenderEmptyBuildTask(render, frame);
         }
 
         return new ChunkRenderRebuildTask(render, context, frame);
@@ -448,7 +482,7 @@ public class RenderSectionManager {
     }
 
     public boolean isChunkPrioritized(RenderSection render) {
-    	return render != null ? render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ) <= NEARBY_CHUNK_DISTANCE : false;
+        return render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ) <= NEARBY_CHUNK_DISTANCE;
     }
 
     public void onChunkRenderUpdates(int x, int y, int z, ChunkRenderData data) {

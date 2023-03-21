@@ -2,10 +2,8 @@ package me.jellysquid.mods.sodium.client.gl.tessellation;
 
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeBinding;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
-
+import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
-
-import com.mojang.blaze3d.platform.GlStateManager;
 
 public abstract class GlAbstractTessellation implements GlTessellation {
     protected final GlPrimitiveType primitiveType;
@@ -26,14 +24,14 @@ public abstract class GlAbstractTessellation implements GlTessellation {
             commandList.bindBuffer(binding.target(), binding.buffer());
 
             for (GlVertexAttributeBinding attrib : binding.attributeBindings()) {
-            	if (attrib.isIntType()) {
+                if (attrib.isIntType()) {
                     GL30C.glVertexAttribIPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(),
                             attrib.getStride(), attrib.getPointer());
                 } else {
-                	GlStateManager._vertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
+                    GL20C.glVertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
                             attrib.getStride(), attrib.getPointer());
                 }
-            	GlStateManager._enableVertexAttribArray(attrib.getIndex());
+                GL20C.glEnableVertexAttribArray(attrib.getIndex());
             }
         }
     }

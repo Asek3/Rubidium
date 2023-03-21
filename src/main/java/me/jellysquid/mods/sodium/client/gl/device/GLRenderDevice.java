@@ -10,8 +10,6 @@ import me.jellysquid.mods.sodium.client.gl.util.EnumBitField;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.*;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -78,7 +76,7 @@ public class GLRenderDevice implements RenderDevice {
         @Override
         public void bindVertexArray(GlVertexArray array) {
             if (this.stateTracker.makeVertexArrayActive(array)) {
-            	GlStateManager._glBindVertexArray(array.handle());
+                GL30C.glBindVertexArray(array.handle());
             }
         }
 
@@ -86,7 +84,7 @@ public class GLRenderDevice implements RenderDevice {
         public void uploadData(GlMutableBuffer glBuffer, ByteBuffer byteBuffer, GlBufferUsage usage) {
             this.bindBuffer(GlBufferTarget.ARRAY_BUFFER, glBuffer);
 
-            GlStateManager._glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, usage.getId());
+            GL20C.glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, usage.getId());
             glBuffer.setSize(byteBuffer.remaining());
         }
 
@@ -101,14 +99,14 @@ public class GLRenderDevice implements RenderDevice {
         @Override
         public void bindBuffer(GlBufferTarget target, GlBuffer buffer) {
             if (this.stateTracker.makeBufferActive(target, buffer)) {
-            	GlStateManager._glBindBuffer(target.getTargetParameter(), buffer.handle());
+                GL20C.glBindBuffer(target.getTargetParameter(), buffer.handle());
             }
         }
 
         @Override
         public void unbindVertexArray() {
             if (this.stateTracker.makeVertexArrayActive(null)) {
-            	GlStateManager._glBindVertexArray(GlVertexArray.NULL_ARRAY_ID);
+                GL30C.glBindVertexArray(GlVertexArray.NULL_ARRAY_ID);
             }
         }
 
@@ -116,7 +114,7 @@ public class GLRenderDevice implements RenderDevice {
         public void allocateStorage(GlMutableBuffer buffer, long bufferSize, GlBufferUsage usage) {
             this.bindBuffer(GlBufferTarget.ARRAY_BUFFER, buffer);
 
-            GlStateManager._glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), bufferSize, usage.getId());
+            GL20C.glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), bufferSize, usage.getId());
             buffer.setSize(bufferSize);
         }
 
@@ -131,7 +129,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = buffer.handle();
             buffer.invalidateHandle();
 
-            GlStateManager._glDeleteBuffers(handle);
+            GL20C.glDeleteBuffers(handle);
         }
 
         @Override
@@ -141,7 +139,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = vertexArray.handle();
             vertexArray.invalidateHandle();
 
-            GlStateManager._glDeleteVertexArrays(handle);
+            GL30C.glDeleteVertexArrays(handle);
         }
 
         @Override
@@ -211,7 +209,7 @@ public class GLRenderDevice implements RenderDevice {
             GlBuffer buffer = map.getBufferObject();
 
             this.bindBuffer(GlBufferTarget.ARRAY_BUFFER, buffer);
-            GlStateManager._glUnmapBuffer(GlBufferTarget.ARRAY_BUFFER.getTargetParameter());
+            GL32C.glUnmapBuffer(GlBufferTarget.ARRAY_BUFFER.getTargetParameter());
 
             buffer.setActiveMapping(null);
             map.dispose();

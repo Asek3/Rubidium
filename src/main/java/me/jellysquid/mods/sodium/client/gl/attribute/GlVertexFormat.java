@@ -8,7 +8,7 @@ import java.util.EnumMap;
  *
  * @param <T> The enumeration over the vertex attributes
  */
-public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
+public class GlVertexFormat<T extends Enum<T>> {
     private final Class<T> attributeEnum;
     private final EnumMap<T, GlVertexAttribute> attributesKeyed;
 
@@ -63,7 +63,7 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
         }
 
         public Builder<T> addElement(T type, int pointer, GlVertexAttributeFormat format, int count, boolean normalized, boolean intType) {
-        	return this.addElement(type, new GlVertexAttribute(format, count, normalized, pointer, this.stride, intType));
+            return this.addElement(type, new GlVertexAttribute(format, count, normalized, pointer, this.stride, intType));
         }
 
         /**

@@ -33,7 +33,7 @@ void main() {
     // Transform the vertex position into model-view-projection space
     gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(position, 1.0);
 
-	// Add the light color to the vertex color, and pass the texture coordinates to the fragment shader
+    // Add the light color to the vertex color, and pass the texture coordinates to the fragment shader
     v_Color = _vert_color * _sample_lightmap(u_LightTex, _vert_tex_light_coord);
     v_TexCoord = _vert_tex_diffuse_coord;
 }

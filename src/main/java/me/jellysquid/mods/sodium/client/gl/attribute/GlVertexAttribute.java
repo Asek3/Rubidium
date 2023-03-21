@@ -18,7 +18,7 @@ public class GlVertexAttribute {
      * @param pointer The offset to the first component in the attribute
      */
     public GlVertexAttribute(GlVertexAttributeFormat format, int count, boolean normalized, int pointer, int stride, boolean intType) {
-    	this(format.typeId(), format.size() * count, count, normalized, pointer, stride, intType);
+        this(format.typeId(), format.size() * count, count, normalized, pointer, stride, intType);
     }
 
     protected GlVertexAttribute(int format, int size, int count, boolean normalized, int pointer, int stride, boolean intType) {
@@ -50,7 +50,7 @@ public class GlVertexAttribute {
     public boolean isNormalized() {
         return this.normalized;
     }
-    
+
     public boolean isIntType() {
         return intType;
     }

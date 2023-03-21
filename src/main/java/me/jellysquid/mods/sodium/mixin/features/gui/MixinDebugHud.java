@@ -7,6 +7,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+
 import org.apache.commons.lang3.Validate;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -75,7 +76,7 @@ public abstract class MixinDebugHud {
                 float y1 = 2 + (height * i);
 
                 this.textRenderer.draw(string, x1, y1, 0xe0e0e0, false, positionMatrix, immediate,
-                        false, 0, 15728880, this.textRenderer.isRightToLeft());
+                        TextRenderer.TextLayerType.NORMAL, 0, 15728880, this.textRenderer.isRightToLeft());
             }
         }
 
@@ -84,7 +85,6 @@ public abstract class MixinDebugHud {
 
     private void renderBackdrop(MatrixStack matrixStack, List<String> list, boolean right) {
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
         int color = 0x90505050;
@@ -129,7 +129,6 @@ public abstract class MixinDebugHud {
         BufferBuilder.BuiltBuffer output = bufferBuilder.end();
 
         BufferRenderer.drawWithGlobalProgram(output);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 }

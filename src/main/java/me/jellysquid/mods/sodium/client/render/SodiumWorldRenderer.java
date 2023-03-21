@@ -12,7 +12,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
-import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheShared;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.frustum.Frustum;
 import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
@@ -105,16 +104,12 @@ public class SodiumWorldRenderer {
         this.world = world;
         this.chunkTracker = new ChunkTracker();
 
-        ChunkRenderCacheShared.createRenderContext(this.world);
-
         try (CommandList commandList = RenderDevice.INSTANCE.createCommandList()) {
             this.initRenderer(commandList);
         }
     }
 
     private void unloadWorld() {
-        ChunkRenderCacheShared.destroyRenderContext(this.world);
-
         if (this.renderSectionManager != null) {
             this.renderSectionManager.destroy();
             this.renderSectionManager = null;
@@ -312,7 +307,7 @@ public class SodiumWorldRenderer {
 
     public void onChunkRenderUpdated(int x, int y, int z, ChunkRenderData meshBefore, ChunkRenderData meshAfter) {
         ListUtil.updateList(this.globalBlockEntities, meshBefore.getGlobalBlockEntities(), meshAfter.getGlobalBlockEntities());
-        
+
         this.renderSectionManager.onChunkRenderUpdates(x, y, z, meshAfter);
     }
 
@@ -325,34 +320,34 @@ public class SodiumWorldRenderer {
             return true;
         }
 
-        Box box = entity.getVisibilityBoundingBox();
-
-        // Entities outside the valid world height will never map to a rendered chunk
-        // Always render these entities or they'll be culled incorrectly!
-        if (box.maxY < 0.5D || box.minY > 255.5D) {
-            return true;
-        }
-
         // Ensure entities with outlines or nametags are always visible
         if (this.client.hasOutline(entity) || entity.shouldRenderName()) {
             return true;
         }
 
+        Box box = entity.getVisibilityBoundingBox();
+
         return this.isBoxVisible(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
-    
+
     public boolean doesChunkHaveFlag(int x, int z, int status) {
         return this.chunkTracker.hasMergedFlags(x, z, status);
     }
-    
-    public boolean isBoxVisible(double x1, double y1, double z1, double x2, double y2, double z2) {
-        int minX = MathHelper.floor(x1 - 0.5D) >> 4;
-        int minY = MathHelper.floor(y1 - 0.5D) >> 4;
-        int minZ = MathHelper.floor(z1 - 0.5D) >> 4;
 
-        int maxX = MathHelper.floor(x2 + 0.5D) >> 4;
-        int maxY = MathHelper.floor(y2 + 0.5D) >> 4;
-        int maxZ = MathHelper.floor(z2 + 0.5D) >> 4;
+    public boolean isBoxVisible(double x1, double y1, double z1, double x2, double y2, double z2) {
+        // Boxes outside the valid world height will never map to a rendered chunk
+        // Always render these boxes or they'll be culled incorrectly!
+        if (y2 < this.world.getBottomY() + 0.5D || y1 > this.world.getTopY() - 0.5D) {
+            return true;
+        }
+
+        int minX = ChunkSectionPos.getSectionCoord(x1 - 0.5D);
+        int minY = ChunkSectionPos.getSectionCoord(y1 - 0.5D);
+        int minZ = ChunkSectionPos.getSectionCoord(z1 - 0.5D);
+
+        int maxX = ChunkSectionPos.getSectionCoord(x2 + 0.5D);
+        int maxY = ChunkSectionPos.getSectionCoord(y2 + 0.5D);
+        int maxZ = ChunkSectionPos.getSectionCoord(z2 + 0.5D);
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
@@ -402,6 +397,10 @@ public class SodiumWorldRenderer {
 
     public Collection<String> getMemoryDebugStrings() {
         return this.renderSectionManager.getDebugStrings();
+    }
+
+    public RenderSectionManager getRenderSectionManager() {
+        return this.renderSectionManager;
     }
 
     public ChunkTracker getChunkTracker() {

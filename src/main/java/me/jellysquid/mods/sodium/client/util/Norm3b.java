@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.client.util;
 
-import org.joml.Vector3f;
-
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
+import org.joml.Vector3f;
 
 /**
  * Provides some utilities for working with packed normal vectors. Each normal component provides 8 bits of

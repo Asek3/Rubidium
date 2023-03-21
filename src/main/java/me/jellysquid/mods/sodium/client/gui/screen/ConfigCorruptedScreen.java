@@ -60,7 +60,7 @@ public class ConfigCorruptedScreen extends Screen {
 
         super.render(matrices, mouseX, mouseY, delta);
 
-        drawTextWithShadow(matrices, this.textRenderer, Text.literal("Rubidium Renderer"), 32, 32, 0xffffff);
+        drawTextWithShadow(matrices, this.textRenderer, Text.literal("Sodium Renderer"), 32, 32, 0xffffff);
         drawTextWithShadow(matrices, this.textRenderer, Text.literal("Could not load configuration file"), 32, 48, 0xff0000);
 
         for (int i = 0; i < TEXT_BODY.size(); i++) {

@@ -21,11 +21,11 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
+    	SodiumPreLaunch.onPreLaunch();
         try {
-        	SodiumPreLaunch.onPreLaunch();
             this.config = SodiumConfig.load(new File("./config/rubidium-mixins.properties"));
         } catch (Exception e) {
-            throw new RuntimeException("Could not load configuration file for Rubidium", e);
+            throw new RuntimeException("Could not load configuration file for Sodium", e);
         }
 
         this.logger.info("Loaded configuration file for Rubidium: {} options available, {} override(s) found",

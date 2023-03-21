@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.model.quad.blender;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.color.ColorMixer;
-import net.minecraft.state.State;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockRenderView;
@@ -14,7 +13,7 @@ public class LinearColorBlender implements ColorBlender {
     private final BlockPos.Mutable mpos = new BlockPos.Mutable();
 
     @Override
-    public <T extends State<O, ?>, O> int[] getColors(BlockRenderView world, BlockPos origin, ModelQuadView quad, ColorSampler<T> sampler, T state) {
+    public <T> int[] getColors(BlockRenderView world, BlockPos origin, ModelQuadView quad, ColorSampler<T> sampler, T state) {
         final int[] colors = this.cachedRet;
 
         for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {

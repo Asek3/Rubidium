@@ -1,56 +1,35 @@
 package me.jellysquid.mods.sodium.client;
 
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.network.NetworkConstants;
-
 import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.NetworkConstants;
+
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
-    private static SodiumGameOptions CONFIG;
+    private static SodiumGameOptions CONFIG = loadConfig();
     private static Logger LOGGER = LoggerFactory.getLogger("Rubidium");
 
     private static String MOD_VERSION;
-
+    
     public static final String MODID = "rubidium";
-    
-    public static boolean oculusLoaded = false;
-    public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
-    
+
     public SodiumClientMod() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
-    
-    public void setup(final FMLClientSetupEvent event) {
-        CONFIG = loadConfig();
-        oculusLoaded = ModList.get().isLoaded("oculus");
-    }
-    
-    public void registerReloadListener(AddReloadListenerEvent ev) {
-    	if(immersiveLoaded)
-    		ev.addListener(new ImmersiveConnectionRenderer());
-    }
 
     public static SodiumGameOptions options() {
         if (CONFIG == null) {
-        	CONFIG = loadConfig();
+            throw new IllegalStateException("Config not yet available");
         }
 
         return CONFIG;

@@ -82,7 +82,7 @@ public class BlockColorCache {
     }
 
     private int[] gatherColorsXZ(ColorResolver resolver, int y) {
-    	RegistryEntry<Biome>[] biomeData = this.getBiomeData(y);
+        RegistryEntry<Biome>[] biomeData = this.getBiomeData(y);
         var colorData = new int[this.sizeHorizontal * this.sizeHorizontal];
 
         for (int x = 0; x < this.sizeHorizontal; x++) {
@@ -99,7 +99,7 @@ public class BlockColorCache {
     }
 
     private RegistryEntry<Biome>[] getBiomeData(int y) {
-    	RegistryEntry<Biome>[] biomes = this.biomes[y];
+        RegistryEntry<Biome>[] biomes = this.biomes[y];
 
         if (biomes == null) {
             this.biomes[y] = (biomes = this.gatherBiomes(y));

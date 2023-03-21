@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
-import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
@@ -27,6 +27,10 @@ public class ChunkBuilder {
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<Thread> threads = new ArrayList<>();
+    /**
+     * Amount of threads which are currently blocked waiting on {@link #jobNotifier}. Synchronized via the same object.
+     */
+    private int idleThreads;
 
     private World world;
     private BlockRenderPassManager renderPassManager;
@@ -112,6 +116,7 @@ public class ChunkBuilder {
         // Delete any queued tasks and resources attached to them
         for (WrappedTask job : this.buildQueue) {
             job.future.cancel(true);
+            job.task.releaseResources();
         }
 
         // Delete any results in the deferred queue
@@ -123,10 +128,10 @@ public class ChunkBuilder {
         this.buildQueue.clear();
 
         this.world = null;
-        
+
         this.doneStealingTasks();
     }
-    
+
     /**
      * Cleans up resources allocated on the currently calling thread for the {@link ChunkBuilder#stealTask()} method.
      * This method should be called on a thread that has stolen tasks when it is done stealing to prevent resource
@@ -150,6 +155,18 @@ public class ChunkBuilder {
         }
 
         return job.future;
+    }
+
+    /**
+     * @return True if all background work has been completed
+     */
+    public boolean isIdle() {
+        if (!this.isBuildQueueEmpty()) {
+            return false;
+        }
+        synchronized (this.jobNotifier) {
+            return this.idleThreads >= this.threads.size();
+        }
     }
 
     /**
@@ -244,9 +261,12 @@ public class ChunkBuilder {
 
         if (job == null && block) {
             synchronized (ChunkBuilder.this.jobNotifier) {
+                ChunkBuilder.this.idleThreads++;
                 try {
                     ChunkBuilder.this.jobNotifier.wait();
                 } catch (InterruptedException ignored) {
+                } finally {
+                    ChunkBuilder.this.idleThreads--;
                 }
             }
         }
@@ -269,6 +289,8 @@ public class ChunkBuilder {
             job.future.completeExceptionally(e);
             e.printStackTrace();
             return;
+        } finally {
+            job.task.releaseResources();
         }
 
         // The result can be null if the task is cancelled

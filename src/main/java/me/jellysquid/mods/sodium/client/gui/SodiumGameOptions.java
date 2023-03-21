@@ -1,19 +1,20 @@
 package me.jellysquid.mods.sodium.client.gui;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
-import net.minecraft.client.option.GraphicsMode;
-import net.minecraft.text.Text;
-import net.minecraftforge.fml.loading.FMLPaths;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
+import net.minecraft.client.option.GraphicsMode;
+import net.minecraft.text.Text;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 public class SodiumGameOptions {
     private static final String DEFAULT_FILE_NAME = "rubidium-options.json";
@@ -41,7 +42,6 @@ public class SodiumGameOptions {
 
         public boolean animateOnlyVisibleTextures = true;
         public boolean useEntityCulling = true;
-        public boolean useParticleCulling = true;
         public boolean useFogOcclusion = true;
         public boolean useBlockFaceCulling = true;
     }
@@ -147,7 +147,7 @@ public class SodiumGameOptions {
     }
 
     private static Path getConfigPath(String name) {
-        return FMLPaths.CONFIGDIR.get().resolve(name);
+    	return FMLPaths.CONFIGDIR.get().resolve(name);
     }
 
     public void writeChanges() throws IOException {

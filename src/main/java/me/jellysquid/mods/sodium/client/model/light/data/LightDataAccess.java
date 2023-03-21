@@ -17,7 +17,7 @@ import net.minecraft.world.BlockRenderView;
  * - OP: Block opacity test, true if opaque
  * - FO: Full block opaque test, true if opaque
  * - FC: Full block test, true if full cube
- * - AO: Ambient occlusion, floating point value in the range of 0.0..1.0 encoded as an 12-bit unsigned integer
+ * - AO: Ambient occlusion, floating point value in the range of 0.0..1.0 encoded as a 12-bit unsigned integer
  * - LM: Light map texture coordinates, two packed UV shorts in an integer
  *
  * You can use the various static pack/unpack methods to extract these values in a usable format.
@@ -69,6 +69,8 @@ public abstract class LightDataAccess {
             em = true;
         }
 
+        // FIX: Fluids are always non-translucent despite blocking light, so we need a special check here in order to
+        // solve lighting issues underwater.
         boolean op = !state.shouldBlockVision(world, pos) || state.getOpacity(world, pos) == 0;
         boolean fo = state.isOpaqueFullCube(world, pos);
         boolean fc = state.isFullCube(world, pos);
@@ -103,7 +105,7 @@ public abstract class LightDataAccess {
     public static boolean unpackFC(long word) {
         return ((word >>> 58) & 0b1) != 0;
     }
-    
+
     public static long packLM(int lm) {
         return (long) lm & 0xFFFFFFFFL;
     }

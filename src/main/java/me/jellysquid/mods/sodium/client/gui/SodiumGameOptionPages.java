@@ -13,10 +13,7 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStor
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.option.AttackIndicator;
-import net.minecraft.client.option.CloudRenderMode;
-import net.minecraft.client.option.GraphicsMode;
-import net.minecraft.client.option.ParticlesMode;
+import net.minecraft.client.option.*;
 import net.minecraft.client.util.Window;
 import net.minecraft.text.Text;
 
@@ -131,20 +128,20 @@ public class SodiumGameOptionPages {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.class, vanillaOpts)
+                .add(OptionImpl.createBuilder(GraphicsMode.class, vanillaOpts)
                         .setName(Text.translatable("options.graphics"))
                         .setTooltip(Text.translatable("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.class, new Text[] { Text.translatable("options.graphics.fast"), Text.translatable("options.graphics.fancy") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsMode.class, new Text[] { Text.translatable("options.graphics.fast"), Text.translatable("options.graphics.fancy"), Text.translatable("options.graphics.fabulous") }))
                         .setBinding(
-                                (opts, value) -> opts.getGraphicsMode().setValue(value == me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FANCY ? GraphicsMode.FANCY : GraphicsMode.FAST),
-                                opts -> opts.getGraphicsMode().getValue() == GraphicsMode.FANCY ? me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FANCY : me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FAST)
+                                (opts, value) -> opts.getGraphicsMode().setValue(value),
+                                opts -> opts.getGraphicsMode().getValue())
                         .setImpact(OptionImpact.HIGH)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());
 
         groups.add(OptionGroup.createBuilder()
-        		.add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
+                .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
                         .setName(Text.translatable("options.renderClouds"))
                         .setTooltip(Text.translatable("sodium.options.clouds_quality.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -287,14 +284,6 @@ public class SodiumGameOptionPages {
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.MEDIUM)
                         .setBinding((opts, value) -> opts.performance.useEntityCulling = value, opts -> opts.performance.useEntityCulling)
-                        .build()
-                )
-                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setName(Text.translatable("sodium.options.use_particle_culling.name"))
-                        .setTooltip(Text.translatable("sodium.options.use_particle_culling.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setImpact(OptionImpact.MEDIUM)
-                        .setBinding((opts, value) -> opts.performance.useParticleCulling = value, opts -> opts.performance.useParticleCulling)
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
