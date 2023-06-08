@@ -1,7 +1,6 @@
-
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_sort;
 
-import me.jellysquid.mods.sodium.client.util.GeometrySort;
+import com.mojang.blaze3d.systems.VertexSorter;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexFormat;
 import org.jetbrains.annotations.Nullable;
@@ -19,19 +18,7 @@ public abstract class MixinBufferBuilder {
     private ByteBuffer buffer;
 
     @Shadow
-    private VertexFormat.DrawMode drawMode;
-
-    @Shadow
     private int elementOffset;
-
-    @Shadow
-    private float sortingCameraX;
-
-    @Shadow
-    private float sortingCameraY;
-
-    @Shadow
-    private float sortingCameraZ;
 
     @Shadow
     @Nullable
@@ -45,6 +32,10 @@ public abstract class MixinBufferBuilder {
 
     @Shadow
     private int batchOffset;
+
+    @Shadow
+    @Nullable
+    private VertexSorter sorter;
 
     /**
      * @author JellySquid
@@ -81,32 +72,9 @@ public abstract class MixinBufferBuilder {
      */
     @Overwrite
     private void writeSortedIndices(VertexFormat.IndexType indexType) {
-        float[] distance = new float[this.sortingPrimitiveCenters.length];
-        int[] indices = new int[this.sortingPrimitiveCenters.length];
-
-        this.calculatePrimitiveDistances(distance, indices);
-
-        GeometrySort.mergeSort(indices, distance);
-
-        this.writePrimitiveIndices(indexType, indices);
-    }
-
-    private void calculatePrimitiveDistances(float[] distance, int[] indices) {
-        int i = 0;
-
-        while (i < this.sortingPrimitiveCenters.length) {
-            Vector3f pos = this.sortingPrimitiveCenters[i];
-
-            if (pos == null) {
-                throw new NullPointerException("Primitive center is null");
-            }
-
-            float x = pos.x() - this.sortingCameraX;
-            float y = pos.y() - this.sortingCameraY;
-            float z = pos.z() - this.sortingCameraZ;
-
-            distance[i] = (x * x) + (y * y) + (z * z);
-            indices[i] = i++;
+        if (sorter != null) {
+            int[] indices = this.sorter.sort(this.sortingPrimitiveCenters);
+            this.writePrimitiveIndices(indexType, indices);
         }
     }
 
@@ -116,16 +84,6 @@ public abstract class MixinBufferBuilder {
         long ptr = MemoryUtil.memAddress(this.buffer, this.elementOffset);
 
         switch (indexType) {
-            case BYTE -> {
-                for (int index : indices) {
-                    int start = index * 4;
-
-                    for (int offset : VERTEX_ORDER) {
-                        MemoryUtil.memPutByte(ptr, (byte) (start + offset));
-                        ptr += Byte.BYTES;
-                    }
-                }
-            }
             case SHORT -> {
                 for (int index : indices) {
                     int start = index * 4;

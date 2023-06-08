@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
 import java.util.SortedSet;
 
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkStatus;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
-import me.jellysquid.mods.sodium.client.render.chunk.ChunkStatus;
 import me.jellysquid.mods.sodium.client.util.frustum.FrustumAdapter;
 import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import net.minecraft.client.MinecraftClient;

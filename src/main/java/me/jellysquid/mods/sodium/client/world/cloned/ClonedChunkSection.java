@@ -11,6 +11,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallba
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
@@ -33,6 +35,7 @@ import net.minecraft.world.chunk.WorldChunk;
 public class ClonedChunkSection {
     private static final LightType[] LIGHT_TYPES = LightType.values();
     private ChunkSection EMPTY_SECTION;
+    private static final PalettedContainer<BlockState> EMPTY_CONTAINER = new PalettedContainer(Block.STATE_IDS, Blocks.AIR.getDefaultState(), PalettedContainer.PaletteProvider.BLOCK_STATE);
 
     private final AtomicInteger referenceCount = new AtomicInteger(0);
     private final ClonedChunkSectionCache backingCache;
@@ -57,7 +60,7 @@ public class ClonedChunkSection {
     }
 
     public void init(World world, ChunkSectionPos pos) {
-        EMPTY_SECTION =  new ChunkSection(0, world.getRegistryManager().get(RegistryKeys.BIOME));
+        EMPTY_SECTION =  new ChunkSection(EMPTY_CONTAINER, new PalettedContainer<RegistryEntry<Biome>>(world.getRegistryManager().get(RegistryKeys.BIOME).getIndexedEntries(), world.getRegistryManager().get(RegistryKeys.BIOME).entryOf(BiomeKeys.PLAINS), PalettedContainer.PaletteProvider.BIOME));
 
         WorldChunk chunk = world.getChunk(pos.getX(), pos.getZ());
 

@@ -219,7 +219,7 @@ public class FluidRenderer {
             this.updateQuad(quad, world, pos, lighter, Direction.UP, 1.0F, colorizer, fluidState);
             this.writeQuad(buffers, offset, quad, facing, ModelQuadWinding.CLOCKWISE);
 
-            if (fluidState.method_15756(world, this.scratchPos.set(posX, posY + 1, posZ))) {
+            if (fluidState.canFlowTo(world, this.scratchPos.set(posX, posY + 1, posZ))) {
                 this.writeQuad(buffers, offset, quad,
                         ModelQuadFacing.DOWN, ModelQuadWinding.COUNTERCLOCKWISE);
 
@@ -466,7 +466,7 @@ public class FluidRenderer {
                 return fluidState.getHeight();
             }
         }
-        if (!blockState.getMaterial().isSolid()) {
+        if (!blockState.isSolid()) {
             return 0.0f;
         }
         return -1.0f;
