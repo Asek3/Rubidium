@@ -50,11 +50,11 @@ public enum CommonVertexElement {
         Arrays.fill(results, -1);
 
         var elements = format.getElements();
-        var offsets = format.offsets;
+        // var offsets = format.offsets;
 
         for (int i = 0; i < elements.size(); i++) {
             var element = elements.get(i);
-            var offset = offsets.getInt(i);
+            var offset = format.getOffset(i);
 
             var type = CommonVertexElement.getCommonType(element);
 
