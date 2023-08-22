@@ -36,6 +36,7 @@ public class SodiumClientMod {
     
     public SodiumClientMod() {
         renderLayers = RenderLayer.getBlockLayers();
+        
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
