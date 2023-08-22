@@ -42,7 +42,7 @@ public class ChunkBuildBuffers {
 
         this.offset = new ChunkModelOffset();
 
-        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+        for (RenderLayer layer : SodiumClientMod.renderLayers) {
             int passId = this.renderPassManager.getRenderPassId(layer);
 
             VertexBufferBuilder[] buffers = this.buffersByLayer[passId];

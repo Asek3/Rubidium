@@ -94,7 +94,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                    for (RenderLayer layer : SodiumClientMod.renderLayers) {
 	                        if (!RenderLayers.canRenderInLayer(blockState, layer)) {
 	                        	continue;
 	                        }
@@ -122,7 +122,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     FluidState fluidState = blockState.getFluidState();
 
                     if (!fluidState.isEmpty()) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                        for (RenderLayer layer : SodiumClientMod.renderLayers) {
                             if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
                                 continue;
                             }

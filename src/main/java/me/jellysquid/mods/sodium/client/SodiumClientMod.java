@@ -1,7 +1,9 @@
 package me.jellysquid.mods.sodium.client;
 
+import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -24,11 +26,15 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
     
+    public static List<RenderLayer> renderLayers = Lists.newArrayList();
+
     public static boolean flywheelLoaded;
     public static boolean oculusLoaded;
     public static boolean cclLoaded;
     
-    public SodiumClientMod() {
+    public SodiumClientMod() {    
+        renderLayers = RenderLayer.getBlockLayers();
+        
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
         
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
