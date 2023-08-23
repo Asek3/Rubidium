@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client;
 
-import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraft.client.render.RenderLayer;
