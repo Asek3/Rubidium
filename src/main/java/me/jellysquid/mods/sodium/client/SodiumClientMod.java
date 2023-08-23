@@ -28,15 +28,13 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
     
-    public static List<RenderLayer> renderLayers = Lists.newArrayList();
+    public static List<RenderLayer> renderLayers = RenderLayer.getBlockLayers();
 
     public static boolean flywheelLoaded;
     public static boolean oculusLoaded;
     public static boolean cclLoaded;
     
     public SodiumClientMod() {    
-        renderLayers = RenderLayer.getBlockLayers();
-        
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
         
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
