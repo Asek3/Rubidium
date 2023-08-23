@@ -27,7 +27,7 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
     
-    public static List<RenderLayer> renderLayers = RenderLayer.getBlockLayers();
+    public static final List<RenderLayer> renderLayers = RenderLayer.getBlockLayers();
 
     public static boolean flywheelLoaded;
     public static boolean oculusLoaded;
