@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client;
 
-import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraft.client.render.RenderLayer;
@@ -30,14 +29,12 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
 
-    public static List<RenderLayer> renderLayers = Lists.newArrayList();
+    public static List<RenderLayer> renderLayers = RenderLayer.getBlockLayers();
     
     public static boolean flywheelLoaded = false;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {
-        renderLayers = RenderLayer.getBlockLayers();
-        
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
