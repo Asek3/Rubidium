@@ -308,7 +308,7 @@ public class FluidRenderer {
                 	BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (!adjBlock.isOpaque() && adjBlock.getRenderType() != BlockRenderType.INVISIBLE) {
+                    if (adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
                     	// should ignore invisible blocks, barriers, light blocks
                         // use static water when adjacent block is ice, glass, stained glass, tinted glass
                         sprite = oSprite;
@@ -358,7 +358,7 @@ public class FluidRenderer {
         int[] biomeColors = null;
 
         if (colorized) {
-            biomeColors = this.biomeColorBlender.getColors(FLUID_COLOR_PROVIDER, world, Blocks.WATER.getDefaultState(), pos, quad);
+            biomeColors = this.biomeColorBlender.getColors(FLUID_COLOR_PROVIDER, world, world.getBlockState(pos), pos, quad);
         }
 
         for (int i = 0; i < 4; i++) {
