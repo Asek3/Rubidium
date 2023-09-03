@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.client.compat;
+package me.jellysquid.mods.sodium.client.compat.flywheel;
 
 import java.util.Collection;
 

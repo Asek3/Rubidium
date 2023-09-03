@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.render.pipeline;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
-import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
+import me.jellysquid.mods.sodium.client.compat.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
@@ -22,6 +22,8 @@ import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
@@ -36,6 +38,10 @@ import java.util.List;
 import java.util.Random;
 
 import codechicken.lib.render.block.ICCBlockRenderer;
+import net.minecraftforge.client.model.pipeline.VertexBufferConsumer;
+import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
+import net.minecraftforge.client.model.pipeline.VertexLighterSmoothAo;
+import net.minecraftforge.common.ForgeConfig;
 
 public class BlockRenderer {
     private final Random random = new XoRoShiRoRandom();
@@ -50,6 +56,8 @@ public class BlockRenderer {
 
     private final boolean useAmbientOcclusion;
 
+    private final boolean experimentalForgeLightPipelineEnabled;
+
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, BiomeColorBlender biomeColorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
         this.biomeColorBlender = biomeColorBlender;
@@ -58,10 +66,22 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
+
+        this.experimentalForgeLightPipelineEnabled = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+    }
+
+    private ForgeBlockRenderer forgeBlockRenderer;
+
+    private ForgeBlockRenderer getForgeBlockRenderer() {
+        if(forgeBlockRenderer == null) {
+            return forgeBlockRenderer = new ForgeBlockRenderer();
+        }
+        return forgeBlockRenderer;
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ChunkModelBuffers buffers, boolean cull, long seed, IModelData modelData) {
-        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model, world, pos));
+        LightMode lightMode = this.getLightingMode(state, model, world, pos);
+        LightPipeline lighter = this.lighters.getLighter(lightMode);
         Vec3d offset = state.getModelOffset(world, pos);
 
         boolean rendered = false;
@@ -73,8 +93,6 @@ public class BlockRenderer {
 	        final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
 	        for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(world, pos)) {
 	            if (renderer.canHandleBlock(world, pos, state)) {
-	                mStack.isEmpty();
-	
 	                builder.reset();
 	                rendered = renderer.renderBlock(state, pos, world, mStack, builder, random, modelData);
 	                builder.flush(buffers);
@@ -82,6 +100,19 @@ public class BlockRenderer {
 	                return rendered;
 	            }
 	        }
+        }
+
+        if(experimentalForgeLightPipelineEnabled) {
+            final MatrixStack mStack = new MatrixStack();
+            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+
+            mStack.translate(offset.x, offset.y, offset.z);
+
+            builder.reset();
+            rendered = getForgeBlockRenderer().renderForgePipeline(getForgeBlockRenderer().getLighter(lightMode, builder, mStack.peek()), world, model, state, pos, cull, this.random, seed, modelData, buffers.getRenderData());
+            builder.flush(buffers);
+
+            return rendered;
         }
         
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
@@ -170,6 +201,10 @@ public class BlockRenderer {
             sink.writeQuad(x, y, z, color, u, v, lm);
         }
 
+        addSpriteData(src, renderData);
+    }
+
+    private void addSpriteData(ModelQuadView src, ChunkRenderData.Builder renderData) {
         Sprite sprite = src.rubidium$getSprite();
 
         if (sprite != null) {
@@ -182,6 +217,78 @@ public class BlockRenderer {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;
+        }
+    }
+
+    private class ForgeBlockRenderer {
+
+        private final ThreadLocal<VertexLighterFlat> lighterFlat;
+        private final ThreadLocal<VertexLighterSmoothAo> lighterSmooth;
+        private final ThreadLocal<VertexBufferConsumer> consumerFlat = ThreadLocal.withInitial(VertexBufferConsumer::new);
+        private final ThreadLocal<VertexBufferConsumer> consumerSmooth = ThreadLocal.withInitial(VertexBufferConsumer::new);
+
+        public ForgeBlockRenderer() {
+            BlockColors colors = MinecraftClient.getInstance().getBlockColors();
+            lighterFlat = ThreadLocal.withInitial(() -> new VertexLighterFlat(colors));
+            lighterSmooth = ThreadLocal.withInitial(() -> new VertexLighterSmoothAo(colors));
+        }
+
+        private VertexLighterFlat getLighter(LightMode lightMode, VertexConsumer vertexConsumer, MatrixStack.Entry entry) {
+            VertexBufferConsumer consumer = null;
+            VertexLighterFlat lighter = null;
+            switch (lightMode) {
+                case SMOOTH:
+                    consumer = this.consumerSmooth.get();
+                    lighter = this.lighterSmooth.get();
+                    break;
+                case FLAT:
+                    consumer = this.consumerFlat.get();
+                    lighter = this.lighterFlat.get();
+                    break;
+            }
+            consumer.setBuffer(vertexConsumer);
+            lighter.setParent(consumer);
+            lighter.setTransform(entry);
+            return lighter;
+        }
+
+        private boolean renderForgePipeline(VertexLighterFlat lighter, BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, boolean checkSides, Random rand, long seed, IModelData modelData, ChunkRenderData.Builder renderData) {
+            lighter.setWorld(world);
+            lighter.setState(state);
+            lighter.setBlockPos(pos);
+            boolean empty = true;
+            rand.setSeed(seed);
+            List<BakedQuad> quads = model.getQuads(state, null, rand, modelData);
+            if(!quads.isEmpty())
+            {
+                lighter.updateBlockInfo();
+                empty = false;
+                for(BakedQuad quad : quads)
+                {
+                    quad.pipe(lighter);
+                    addSpriteData((ModelQuadView) quad, renderData);
+                }
+            }
+            for(Direction side : DirectionUtil.ALL_DIRECTIONS)
+            {
+                rand.setSeed(seed);
+                quads = model.getQuads(state, side, rand, modelData);
+                if(!quads.isEmpty())
+                {
+                    if(!checkSides || occlusionCache.shouldDrawSide(state, world, pos, side))
+                    {
+                        if(empty) lighter.updateBlockInfo();
+                        empty = false;
+                        for(BakedQuad quad : quads)
+                        {
+                            quad.pipe(lighter);
+                            addSpriteData((ModelQuadView) quad, renderData);
+                        }
+                    }
+                }
+            }
+            lighter.resetBlockInfo();
+            return !empty;
         }
     }
 }
