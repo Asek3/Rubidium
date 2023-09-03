@@ -56,9 +56,6 @@ public class SodiumConfig {
         this.addMixinRule("features.fast_biome_colors", true);
         
         if(FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) { this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen"); }
-
-        if(FMLLoader.getLoadingModList().getModFileById("abnormals_core") != null) { this.options.get("mixin.features.world_ticking").addModOverride(false, "abnormals_core"); }
-        
     }
 
     /**

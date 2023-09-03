@@ -24,7 +24,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.Random;
 import java.util.function.Supplier;
 
-@Mixin(ClientWorld.class)
+// Priority for compatibility with AbnormalsCore/BetterFoliage
+@Mixin(value = ClientWorld.class, priority = 990)
 public abstract class MixinClientWorld extends World {
     @Shadow
     protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
@@ -54,7 +55,8 @@ public abstract class MixinClientWorld extends World {
         BlockState blockState = this.getBlockState(pos);
 
         if (!blockState.isAir()) {
-            this.performBlockDisplayTick(blockState, pos, random, spawnBarrierParticles);
+            blockState.getBlock().randomDisplayTick(blockState, this, pos, random);
+            this.performBarrierTick(blockState, pos, spawnBarrierParticles);
         }
 
         if (!blockState.isFullCube(this, pos)) {
@@ -64,13 +66,12 @@ public abstract class MixinClientWorld extends World {
         FluidState fluidState = blockState.getFluidState();
 
         if (!fluidState.isEmpty()) {
-            this.performFluidDisplayTick(blockState, fluidState, pos, random);
+            fluidState.randomDisplayTick(this, pos, random);
+            this.performFluidParticles(blockState, fluidState, pos, random);
         }
     }
 
-    private void performBlockDisplayTick(BlockState blockState, BlockPos pos, Random random, boolean spawnBarrierParticles) {
-        blockState.getBlock().randomDisplayTick(blockState, this, pos, random);
-
+    private void performBarrierTick(BlockState blockState, BlockPos pos, boolean spawnBarrierParticles) {
         if (spawnBarrierParticles && blockState.isOf(Blocks.BARRIER)) {
             this.performBarrierDisplayTick(pos);
         }
@@ -95,9 +96,7 @@ public abstract class MixinClientWorld extends World {
         }
     }
 
-    private void performFluidDisplayTick(BlockState blockState, FluidState fluidState, BlockPos.Mutable pos, Random random) {
-        fluidState.randomDisplayTick(this, pos, random);
-
+    private void performFluidParticles(BlockState blockState, FluidState fluidState, BlockPos.Mutable pos, Random random) {
         ParticleEffect particleEffect = fluidState.getParticle();
 
         if (particleEffect != null && random.nextInt(10) == 0) {
