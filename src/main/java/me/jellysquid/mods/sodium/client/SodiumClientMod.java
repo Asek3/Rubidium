@@ -17,12 +17,12 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
+    public static final String MODID = "rubidium";
+
     private static SodiumGameOptions CONFIG;
-    public static Logger LOGGER = LogManager.getLogger("Rubidium");
+    private static final Logger LOGGER = LogManager.getLogger("Rubidium");
 
     private static String MOD_VERSION;
-
-    public static final String MODID = "rubidium";
     
     public static boolean flywheelLoaded;
     public static boolean oculusLoaded;
@@ -35,10 +35,11 @@ public class SodiumClientMod {
     }
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
+        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+
     	flywheelLoaded = ModList.get().isLoaded("flywheel");
     	oculusLoaded = ModList.get().isLoaded("oculus");
     	cclLoaded = ModList.get().isLoaded("codechickenlib");
-    	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
     	
     	if(cclLoaded) {
     		CCLCompat.init();
@@ -54,15 +55,11 @@ public class SodiumClientMod {
     }
 
     public static Logger logger() {
-        if (LOGGER == null) {
-            LOGGER = LogManager.getLogger("Rubidium");
-        }
-
         return LOGGER;
     }
 
     private static SodiumGameOptions loadConfig() {
-        return SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve("rubidium-options.json"));
+        return SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve(MODID + "-options.json"));
     }
 
     public static String getVersion() {

@@ -61,23 +61,23 @@ public class CCLCompat {
 	@SuppressWarnings("unchecked")
 	public static void init() {
 		try {
-			SodiumClientMod.LOGGER.info("Retrieving block renderers");
+			SodiumClientMod.logger().info("Retrieving block renderers");
             final Field blockRenderersField = BlockRenderingRegistry.class.getDeclaredField("blockRenderers");
             blockRenderersField.setAccessible(true);
             customBlockRenderers = (Map<IRegistryDelegate<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
 
-            SodiumClientMod.LOGGER.info("Retrieving fluid renderers");
+            SodiumClientMod.logger().info("Retrieving fluid renderers");
             final Field fluidRenderersField = BlockRenderingRegistry.class.getDeclaredField("fluidRenderers");
             fluidRenderersField.setAccessible(true);
             customFluidRenderers = (Map<IRegistryDelegate<Fluid>, ICCBlockRenderer>) fluidRenderersField.get(null);
 
-            SodiumClientMod.LOGGER.info("Retrieving global renderers");
+            SodiumClientMod.logger().info("Retrieving global renderers");
             final Field globalRenderersField = BlockRenderingRegistry.class.getDeclaredField("globalRenderers");
             globalRenderersField.setAccessible(true);
             customGlobalRenderers = (List<ICCBlockRenderer>) globalRenderersField.get(null);
         }
         catch (final @NotNull Throwable t) {
-        	SodiumClientMod.LOGGER.error("Could not retrieve custom renderers");
+        	SodiumClientMod.logger().error("Could not retrieve custom renderers");
         }
 
 	}

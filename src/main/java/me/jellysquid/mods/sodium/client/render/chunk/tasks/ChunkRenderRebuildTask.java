@@ -44,7 +44,7 @@ import net.minecraftforge.client.model.data.IModelData;
  */
 public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkRenderBuildTask<T> {
     private final ChunkRenderContainer<T> render;
-        
+
     private final BlockPos offset;
 
     private final ChunkRenderContext context;
@@ -72,7 +72,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         int baseZ = this.render.getOriginZ();
 
         Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(baseX), ChunkSectionPos.getSectionCoord(baseZ)));
-        
+
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos renderOffset = this.offset;
 
@@ -94,28 +94,28 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-	                        if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-	                        	continue;
-	                        }
-	                        
-	                        ForgeHooksClient.setRenderLayer(layer);
+                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
+                                continue;
+                            }
+
+                            ForgeHooksClient.setRenderLayer(layer);
                             IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
-	                        
-	                        // Oculus Compat
-	                        if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
-	                            ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
-	                        }
-	
-	                        BakedModel model = cache.getBlockModels()
-	                                .getModel(blockState);
-	
-	                        long seed = blockState.getRenderingSeed(pos);
-	
-	                        if (cache.getBlockRenderer().renderModel(slice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
-	                            bounds.addBlock(relX, relY, relZ);
-	                        }
-	                        
+
+                            // Oculus Compat
+                            if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
+                                ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
+                            }
+
+                            BakedModel model = cache.getBlockModels()
+                                    .getModel(blockState);
+
+                            long seed = blockState.getRenderingSeed(pos);
+
+                            if (cache.getBlockRenderer().renderModel(slice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
+                                bounds.addBlock(relX, relY, relZ);
+                            }
+
                         }
                     }
 
@@ -131,12 +131,12 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                                 // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
                                 ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
                             }
-                            
+
                             ForgeHooksClient.setRenderLayer(layer);
 
-	                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
-	                            bounds.addBlock(relX, relY, relZ);
-	                        }
+                            if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
+                                bounds.addBlock(relX, relY, relZ);
+                            }
                         }
                     }
 
@@ -160,7 +160,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                 }
             }
         }
-        
+
         ForgeHooksClient.setRenderLayer(null);
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {

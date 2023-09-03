@@ -12,7 +12,7 @@
     "conformVisibility": true
   },
   "client": [
-	"core.MixinDirection",
+    "core.MixinDirection",
     "core.MixinWindow",
     "core.frustum.MixinFrustum",
     "core.matrix.MixinMatrix3f",
@@ -45,15 +45,15 @@
     "features.entity.smooth_lighting.MixinPaintingEntityRenderer",
     "features.gui.MixinDebugHud",
     "features.gui.fast_loading_screen.MixinLevelLoadingScreen",
-	"features.gui.fast_status_bars.MixinInGameHud",
+    "features.gui.fast_status_bars.MixinInGameHud",
     "features.gui.fast_fps_pie.MixinMinecraftClient",
     "features.gui.font.MixinGlyphRenderer",
     "features.item.MixinItemRenderer",
     "features.matrix_stack.MixinMatrixStack",
     "features.matrix_stack.MixinVertexConsumer",
     "features.model.MixinMultipartBakedModel",
-	"features.model.MixinWeightedBakedModel",
-	"features.optimized_bamboo.MixinBambooBlock",
+    "features.model.MixinWeightedBakedModel",
+    "features.optimized_bamboo.MixinBambooBlock",
     "features.options.MixinGameOptions",
     "features.options.MixinForgeIngameGui",
     "features.options.MixinMinecraftClient",
@@ -63,14 +63,14 @@
     "features.particle.fast_render.MixinBillboardParticle",
     "features.render_layer.MixinRenderLayer",
     "features.render_layer.leaves.MixinRenderLayers",
-	"features.render_layer.leaves.MixinLeavesBlock",
-	"features.sky.MixinWorldRenderer",
+    "features.render_layer.leaves.MixinLeavesBlock",
+    "features.sky.MixinWorldRenderer",
     "features.texture_tracking.MixinSprite",
     "features.texture_tracking.MixinSpriteAtlasTexture",
-	"features.texture_tracking.MixinSpriteBillboardParticle",
+    "features.texture_tracking.MixinSpriteBillboardParticle",
     "features.world_ticking.MixinClientWorld",
-	"features.fast_biome_colors.MixinBackgroundRenderer",
-	"features.fast_biome_colors.MixinBlock",
-	"features.fast_biome_colors.MixinFluid"
+    "features.fast_biome_colors.MixinBackgroundRenderer",
+    "features.fast_biome_colors.MixinBlock",
+    "features.fast_biome_colors.MixinFluid"
   ]
 }
