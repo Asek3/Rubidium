@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.gui;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
@@ -17,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class SodiumGameOptions {
-    private static final String DEFAULT_FILE_NAME = "rubidium-options.json";
+    private static final String DEFAULT_FILE_NAME = SodiumClientMod.MODID + "-options.json";
 
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
