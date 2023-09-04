@@ -8,6 +8,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 
@@ -24,9 +25,9 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
     
-    public static boolean flywheelLoaded;
-    public static boolean oculusLoaded;
-    public static boolean cclLoaded;
+    public static final boolean flywheelLoaded = FMLLoader.getLoadingModList().getModFileById("flywheel") != null;
+    public static final boolean oculusLoaded = FMLLoader.getLoadingModList().getModFileById("oculus") != null;
+    public static final boolean cclLoaded = FMLLoader.getLoadingModList().getModFileById("codechickenlib") != null;
     
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
@@ -36,10 +37,6 @@ public class SodiumClientMod {
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-
-    	flywheelLoaded = ModList.get().isLoaded("flywheel");
-    	oculusLoaded = ModList.get().isLoaded("oculus");
-    	cclLoaded = ModList.get().isLoaded("codechickenlib");
     	
     	if(cclLoaded) {
     		CCLCompat.init();

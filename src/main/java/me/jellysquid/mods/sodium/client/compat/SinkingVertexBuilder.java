@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.compat;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.Direction;

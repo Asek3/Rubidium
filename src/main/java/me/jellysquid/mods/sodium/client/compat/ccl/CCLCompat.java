@@ -19,10 +19,10 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.registries.IRegistryDelegate;
 
 public class CCLCompat {
-	
-	public static Map<IRegistryDelegate<Block>, ICCBlockRenderer> customBlockRenderers;
-	public static Map<IRegistryDelegate<Fluid>, ICCBlockRenderer> customFluidRenderers;
-	public static List<ICCBlockRenderer> customGlobalRenderers;
+
+    public static Map<IRegistryDelegate<Block>, ICCBlockRenderer> customBlockRenderers;
+    public static Map<IRegistryDelegate<Fluid>, ICCBlockRenderer> customFluidRenderers;
+    public static List<ICCBlockRenderer> customGlobalRenderers;
 
     public static @NotNull List<ICCBlockRenderer> getCustomRenderers(final @NotNull BlockRenderView world, final @NotNull BlockPos pos) {
         final BlockState state = world.getBlockState(pos);
@@ -32,36 +32,36 @@ public class CCLCompat {
         final Fluid fluid = fluidState.getFluid();
 
         if(customGlobalRenderers == null)
-        	return new ArrayList<>();
-        
+            return new ArrayList<>();
+
         final ArrayList<ICCBlockRenderer> renderers = new ArrayList<>(customGlobalRenderers);
 
         if(customBlockRenderers != null)
-	        for (final Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
-	            final Block entryBlock = entry.getKey().get();
-	
-	            if (entryBlock.is(block)) {
-	                renderers.add(entry.getValue());
-	            }
-	        }
+            for (final Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
+                final Block entryBlock = entry.getKey().get();
+
+                if (entryBlock.is(block)) {
+                    renderers.add(entry.getValue());
+                }
+            }
 
         if(customFluidRenderers != null)
-	        for (final Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-	            final Fluid entryFluid = entry.getKey().get();
-	
-	            if (entryFluid.matchesType(fluid)) {
-	                renderers.add(entry.getValue());
-	            }
-	        }
+            for (final Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
+                final Fluid entryFluid = entry.getKey().get();
+
+                if (entryFluid.matchesType(fluid)) {
+                    renderers.add(entry.getValue());
+                }
+            }
 
         return renderers;
     }
 
-    
-	@SuppressWarnings("unchecked")
-	public static void init() {
-		try {
-			SodiumClientMod.logger().info("Retrieving block renderers");
+
+    @SuppressWarnings("unchecked")
+    public static void init() {
+        try {
+            SodiumClientMod.logger().info("Retrieving block renderers");
             final Field blockRenderersField = BlockRenderingRegistry.class.getDeclaredField("blockRenderers");
             blockRenderersField.setAccessible(true);
             customBlockRenderers = (Map<IRegistryDelegate<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
@@ -77,9 +77,9 @@ public class CCLCompat {
             customGlobalRenderers = (List<ICCBlockRenderer>) globalRenderersField.get(null);
         }
         catch (final @NotNull Throwable t) {
-        	SodiumClientMod.logger().error("Could not retrieve custom renderers");
+            SodiumClientMod.logger().error("Could not retrieve custom renderers");
         }
 
-	}
-	
+    }
+
 }
