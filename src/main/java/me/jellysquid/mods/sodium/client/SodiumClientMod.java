@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -20,14 +21,14 @@ import org.slf4j.LoggerFactory;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
+    public static final String MODID = "rubidium";
+
     private static SodiumGameOptions CONFIG;
-    private static Logger LOGGER = LoggerFactory.getLogger("Rubidium");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Rubidium");
 
     private static String MOD_VERSION;
-
-    public static final String MODID = "rubidium";
     
-    public static boolean oculusLoaded = false;
+    public static boolean oculusLoaded = FMLLoader.getLoadingModList().getModFileById("oculus") != null;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {
@@ -40,12 +41,11 @@ public class SodiumClientMod {
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
-        oculusLoaded = ModList.get().isLoaded("oculus");
     }
     
-    public void registerReloadListener(AddReloadListenerEvent ev) {
+    public void registerReloadListener(RegisterClientReloadListenersEvent ev) {
     	if(immersiveLoaded)
-    		ev.addListener(new ImmersiveConnectionRenderer());
+    		ev.registerReloadListener(new ImmersiveConnectionRenderer());
     }
 
     public static SodiumGameOptions options() {
@@ -57,10 +57,6 @@ public class SodiumClientMod {
     }
 
     public static Logger logger() {
-        if (LOGGER == null) {
-            throw new IllegalStateException("Logger not yet available");
-        }
-
         return LOGGER;
     }
 
