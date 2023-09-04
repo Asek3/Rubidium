@@ -56,7 +56,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     @Nonnull
     @Override
     public VertexConsumer color(int r, int g, int b, int a) {
-        color = (a & 0xFF) << 24 | (b & 0xFF) << 16 | (g & 0xFF) << 8 | (r & 0xFF);
+        color = ColorABGR.pack(r, g, b, a);
         return this;
     }
 
