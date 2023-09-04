@@ -105,7 +105,7 @@ public final class SinkingVertexBuilder extends FixedColorVertexConsumer {
         buffer.putFloat(z);
         buffer.putFloat(u);
         buffer.putFloat(v);
-        buffer.putInt(color);
+        buffer.putInt(colorFixed ? ColorABGR.pack(fixedRed, fixedBlue, fixedGreen, fixedAlpha) : color);
         buffer.putInt(light);
         // We store 32 bytes per vertex
 
@@ -171,7 +171,7 @@ public final class SinkingVertexBuilder extends FixedColorVertexConsumer {
         final float z = buffer.getFloat();
         final float u = buffer.getFloat();
         final float v = buffer.getFloat();
-        final int color = colorFixed ? ColorABGR.pack(fixedRed, fixedBlue, fixedGreen, fixedAlpha) : buffer.getInt();
+        final int color = buffer.getInt();
         final int light = buffer.getInt();
 
         sink.writeVertex(x, y, z, color, u, v, light, chunkId);
