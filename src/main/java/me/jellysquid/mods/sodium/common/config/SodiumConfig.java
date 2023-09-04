@@ -187,7 +187,7 @@ public class SodiumConfig {
             }
 
             SodiumConfig config = new SodiumConfig();
-            //config.applyModOverrides();
+            config.applyModOverrides();
 
             return config;
         }
