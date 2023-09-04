@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
@@ -46,7 +47,7 @@ public class SodiumOptionsGUI extends Screen {
     private ControlElement<?> hoveredElement;
 
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(new TranslatableText("Sodium Options"));
+        super(new TranslatableText("Rubidium Options"));
 
         this.prevScreen = prevScreen;
 
@@ -86,10 +87,10 @@ public class SodiumOptionsGUI extends Screen {
         this.rebuildGUIPages();
         this.rebuildGUIOptions();
 
-        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.undo").getString(), this::undoChanges);
-        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.apply").getString(), this::applyChanges);
-        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 26, 65, 20), new TranslatableText("gui.done").getString(), this::onClose);
-        String donateToJelly = new TranslatableText("sodium.options.buttons.donate").getString();
+        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 26, 65, 20), new TranslatableText("gui.done"), this::onClose);
+        Text donateToJelly = new TranslatableText("sodium.options.buttons.donate");
         int width = 12 + this.textRenderer.getWidth(donateToJelly);
         this.donateButton = new FlatButtonWidget(new Dim2i(6, this.height - 26, width, 20), donateToJelly, this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(new Dim2i(12 + width, this.height - 26, 20, 20), "x", this::hideDonationButton);
