@@ -48,10 +48,18 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
     private final ChunkRenderContext renderContext;
     private final int frame;
 
+    private final Map<BlockPos, IModelData> modelData;
+
     public ChunkRenderRebuildTask(RenderSection render, ChunkRenderContext renderContext, int frame) {
         this.render = render;
         this.renderContext = renderContext;
         this.frame = frame;
+
+        this.modelData = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
+    }
+
+    public IModelData getModelData(BlockPos pos) {
+        return modelData.getOrDefault(pos, EmptyModelData.INSTANCE);
     }
 
     @Override
@@ -76,8 +84,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
-
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
         BlockPos.Mutable offset = new BlockPos.Mutable();
 
@@ -99,14 +105,25 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
                     boolean rendered = false;
 
-                    if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
+                    FluidState fluidState = blockState.getFluidState();
+                    IModelData modelData = getModelData(blockPos);
+                    for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                        ForgeHooksClient.setRenderType(layer);
+
+                        if (!fluidState.isEmpty()) {
+                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
                                 continue;
                             }
 
-                            ForgeHooksClient.setRenderType(layer);
-                            IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
+                            if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
+                                rendered = true;
+                            }
+                        }
+
+                        if (blockState.getRenderType() == BlockRenderType.MODEL) {
+                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
+                                continue;
+                            }
 
                             BakedModel model = cache.getBlockModels()
                                     .getModel(blockState);
@@ -114,22 +131,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             long seed = blockState.getRenderingSeed(blockPos);
 
                             if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData)) {
-                                rendered = true;
-                            }
-                    	}
-                    }
-
-                    FluidState fluidState = blockState.getFluidState();
-
-                    if (!fluidState.isEmpty()) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
-                                continue;
-                            }
-
-                            ForgeHooksClient.setRenderType(layer);
-
-                            if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
                                 rendered = true;
                             }
                         }
@@ -162,11 +163,11 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         ForgeHooksClient.setRenderType(null);
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
-        
+
         if(SodiumClientMod.immersiveLoaded)
-	        ImmersiveConnectionRenderer.renderConnectionsInSection(
-	                buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
-	        );
+            ImmersiveConnectionRenderer.renderConnectionsInSection(
+                    buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
+            );
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);
@@ -181,7 +182,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
     }
-    
+
     @Override
     public void releaseResources() {
         this.renderContext.releaseResources();
