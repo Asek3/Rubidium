@@ -22,6 +22,8 @@ import net.minecraft.client.option.ParticlesMode;
 import net.minecraft.client.util.Window;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLCapabilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -262,6 +264,15 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.performance.alwaysDeferChunkUpdates = value, opts -> opts.performance.alwaysDeferChunkUpdates)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_UPDATE)
                         .build())
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName(new TranslatableText("sodium.options.use_no_error_context.name"))
+                        .setTooltip(new TranslatableText("sodium.options.use_no_error_context.tooltip"))
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.performance.useNoErrorGLContext = value, opts -> opts.performance.useNoErrorGLContext)
+                        .setEnabled(supportsNoErrorContext())
+                        .setFlags(OptionFlag.REQUIRES_GAME_RESTART)
+                        .build())
                 .build()
         );
 
@@ -361,5 +372,10 @@ public class SodiumGameOptionPages {
                 .build());
 
         return new OptionPage(new TranslatableText("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
+    }
+
+    private static boolean supportsNoErrorContext() {
+        GLCapabilities capabilities = GL.getCapabilities();
+        return capabilities.OpenGL46 || capabilities.GL_KHR_no_error;
     }
 }
