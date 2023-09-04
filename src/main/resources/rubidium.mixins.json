@@ -12,6 +12,7 @@
   },
   "client": [
 	"core.MixinDirection",
+    "core.MixinWindow",
     "core.MixinFrustum",
     "core.MixinMinecraftClient",
     "core.matrix.MixinMatrix3f",
