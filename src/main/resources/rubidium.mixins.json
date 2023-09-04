@@ -14,6 +14,7 @@
   "client": [
     "core.MixinDirection",
     "core.MixinWindow",
+    "core.compat.ctm.MixinRegionCache",
     "core.frustum.MixinFrustum",
     "core.matrix.MixinMatrix3f",
     "core.matrix.MixinMatrix4f",
