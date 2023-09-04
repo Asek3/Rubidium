@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
@@ -30,6 +31,7 @@ public class SodiumClientMod {
     
     public static boolean flywheelLoaded = FMLLoader.getLoadingModList().getModFileById("flywheel") != null;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
+    public static boolean cclLoaded = FMLLoader.getLoadingModList().getModFileById("codechickenlib") != null;
     
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -41,6 +43,10 @@ public class SodiumClientMod {
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
+
+        if(cclLoaded) {
+            CCLCompat.init();
+        }
     }
     
     public void registerReloadListener(RegisterClientReloadListenersEvent ev) {

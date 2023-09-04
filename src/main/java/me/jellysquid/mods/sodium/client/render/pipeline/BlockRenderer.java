@@ -1,5 +1,9 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
+import codechicken.lib.render.block.ICCBlockRenderer;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.SinkingVertexBuilder;
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
@@ -23,6 +27,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -62,6 +67,20 @@ public class BlockRenderer {
         modelData = model.getModelData(world, pos, state, modelData);
 
         boolean rendered = false;
+
+        if(SodiumClientMod.cclLoaded) {
+            final MatrixStack mStack = new MatrixStack();
+            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+            for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(world, pos)) {
+                if (renderer.canHandleBlock(world, pos, state)) {
+                    builder.reset();
+                    rendered = renderer.renderBlock(state, pos, world, mStack, builder, random, modelData);
+                    builder.flush(buffers);
+
+                    return rendered;
+                }
+            }
+        }
 
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
             this.random.setSeed(seed);
