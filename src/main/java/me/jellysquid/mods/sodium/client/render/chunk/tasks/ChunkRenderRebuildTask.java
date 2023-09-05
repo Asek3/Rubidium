@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
 import java.util.Map;
 
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -15,7 +14,6 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.coderbot.iris.compat.sodium.impl.block_context.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -109,11 +107,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                                 continue;
                             }
 
-                            if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
-                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                                ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
-                            }
-
                             if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
                                 bounds.addBlock(relX, relY, relZ);
                             }
@@ -122,11 +115,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             if (!RenderLayers.canRenderInLayer(blockState, layer)) {
                                 continue;
-                            }
-
-                            // Oculus Compat
-                            if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
-                                ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
                             }
 
                             BakedModel model = cache.getBlockModels()
