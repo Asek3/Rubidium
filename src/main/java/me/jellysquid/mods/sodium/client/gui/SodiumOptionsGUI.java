@@ -92,8 +92,8 @@ public class SodiumOptionsGUI extends Screen {
         this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 26, 65, 20), new TranslatableText("gui.done"), this::onClose);
         Text donateToJelly = new TranslatableText("sodium.options.buttons.donate");
         int width = 12 + this.textRenderer.getWidth(donateToJelly);
-        this.donateButton = new FlatButtonWidget(new Dim2i(6, this.height - 26, width, 20), donateToJelly, this::openDonationPage);
-        this.hideDonateButton = new FlatButtonWidget(new Dim2i(12 + width, this.height - 26, 20, 20), "x", this::hideDonationButton);
+        this.donateButton = new FlatButtonWidget(new Dim2i(this.width - width - 32, 6, width, 20), donateToJelly, this::openDonationPage);
+        this.hideDonateButton = new FlatButtonWidget(new Dim2i(this.width - 26, 6, 20, 20), "x", this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hideDonationButton) {
             this.setDonationButtonVisibility(false);
