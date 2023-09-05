@@ -80,22 +80,15 @@ public class MixinItemRenderer {
                     colorProvider = ((ItemColorsExtended) this.colorMap).getColorProvider(stack);
                 }
 
-                try {
-	                if (colorProvider == null) {
-	                    color = ColorARGB.toABGR(this.colorMap.getColorMultiplier(stack, bakedQuad.getColorIndex()), 255);
-	                } else {
-	                    color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
-	                }
-                }catch(Exception e) {
-                }
+                color = ColorARGB.toABGR(colorProvider != null ? colorProvider.getColor(stack, bakedQuad.getColorIndex()) :
+                        this.colorMap.getColorMultiplier(stack, bakedQuad.getColorIndex()), 255);
             }
 
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-            	
-            	int fColor = multARGBInts(quad.getColor(i), color);
-            	
+                int fColor = multABGRInts(quad.getColor(i), color);
+
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
@@ -105,9 +98,9 @@ public class MixinItemRenderer {
 
         drain.flush();
     }
-    
-    private int multARGBInts(int colorA, int colorB) {
-    	// Most common case: Either quad coloring or tint-based coloring, but not both
+
+    private int multABGRInts(int colorA, int colorB) {
+        // Most common case: Either quad coloring or tint-based coloring, but not both
         if (colorA == -1) {
             return colorB;
         } else if (colorB == -1) {
@@ -120,5 +113,5 @@ public class MixinItemRenderer {
         int r = (int)((ColorABGR.unpackRed(colorA)/255.0f) * (ColorABGR.unpackRed(colorB)/255.0f) * 255.0f);
         return ColorABGR.pack(r, g, b, a);
     }
-    
+
 }
