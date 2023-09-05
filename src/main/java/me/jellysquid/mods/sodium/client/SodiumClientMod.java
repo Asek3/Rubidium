@@ -26,7 +26,6 @@ public class SodiumClientMod {
     private static String MOD_VERSION;
     
     public static final boolean flywheelLoaded = FMLLoader.getLoadingModList().getModFileById("flywheel") != null;
-    public static final boolean oculusLoaded = FMLLoader.getLoadingModList().getModFileById("oculus") != null;
     public static final boolean cclLoaded = FMLLoader.getLoadingModList().getModFileById("codechickenlib") != null;
     
     public SodiumClientMod() {

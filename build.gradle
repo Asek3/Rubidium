@@ -51,7 +51,6 @@ dependencies {
 	modCompileOnly "curse.maven:flywheel-486392:3535459"
 	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
 	modCompileOnly "team.chisel.ctm:CTM:MC1.16.1-1.1.2.6"
-	modCompileOnly "maven.modrinth:oculus:1.16.5-1.4.5"
 }
 
 processResources {
