@@ -102,21 +102,13 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     for (RenderLayer layer : RenderLayer.getBlockLayers()) {
                         ForgeHooksClient.setRenderLayer(layer);
 
-                        if (!fluidState.isEmpty()) {
-                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
-                                continue;
-                            }
-
+                        if (!fluidState.isEmpty() && RenderLayers.canRenderInLayer(fluidState, layer)) {
                             if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
                                 bounds.addBlock(relX, relY, relZ);
                             }
                         }
 
-                        if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-                                continue;
-                            }
-
+                        if (blockState.getRenderType() == BlockRenderType.MODEL && RenderLayers.canRenderInLayer(blockState, layer)) {
                             BakedModel model = cache.getBlockModels()
                                     .getModel(blockState);
 
