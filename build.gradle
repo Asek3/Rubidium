@@ -4,10 +4,11 @@ plugins {
 }
 
 loom {
-    silentMojangMappingsLicense()
+	silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-			"rubidium.mixins.json"
+				"rubidium.mixins.json",
+				"rubidium.compat.mixins.json"
 		]
 	}
 	mixin.defaultRefmapName = "rubidium-mixins-refmap.json"
@@ -36,19 +37,19 @@ repositories {
 		}
 	}
 	maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-    	}
-  	}
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-		
+
 	modCompileOnly "curse.maven:flywheel-486392:3535459"
 	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
 	modCompileOnly "team.chisel.ctm:CTM:MC1.16.1-1.1.2.6"
@@ -58,8 +59,8 @@ processResources {
 	inputs.property "version", project.version
 
 	filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
+		expand "version": project.version
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -67,7 +68,7 @@ tasks.withType(JavaCompile).configureEach {
 
 	def targetVersion = 8
 	if (JavaVersion.current().isJava9Compatible()) {
-		 it.options.release = targetVersion
+		it.options.release = targetVersion
 	}
 }
 

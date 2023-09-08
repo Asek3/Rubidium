@@ -11,7 +11,6 @@ import team.chisel.ctm.client.util.RegionCache;
 
 import java.lang.ref.WeakReference;
 
-@Pseudo
 @Mixin(RegionCache.class)
 public class MixinRegionCache {
 

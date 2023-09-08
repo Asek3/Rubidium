@@ -1,0 +1,16 @@
+{
+  "package": "me.jellysquid.mods.sodium.mixin.core.compat",
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "me.jellysquid.mods.sodium.mixin.core.compat.CompatMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "conformVisibility": true
+  },
+  "client": [
+    "ctm.MixinRegionCache"
+  ]
+}
