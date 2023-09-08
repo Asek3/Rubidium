@@ -53,7 +53,7 @@
     "features.matrix_stack.MixinVertexConsumer",
     "features.model.MixinMultipartBakedModel",
     "features.model.MixinWeightedBakedModel",
-    "features.options.MixinInGameHud",
+    "features.options.MixinForgeIngameGui",
     "features.options.MixinOptionsScreen",
     "features.options.MixinWorldRenderer",
     "features.particle.cull.MixinParticleManager",
