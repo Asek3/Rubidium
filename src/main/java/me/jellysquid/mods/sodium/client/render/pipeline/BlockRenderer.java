@@ -75,7 +75,7 @@ public class BlockRenderer {
                 if (renderer.canHandleBlock(world, pos, state)) {
                     builder.reset();
                     rendered = renderer.renderBlock(state, pos, world, mStack, builder, random, modelData);
-                    builder.flush(buffers);
+                    builder.flush(buffers, origin);
 
                     return rendered;
                 }

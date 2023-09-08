@@ -1,12 +1,15 @@
 package me.jellysquid.mods.sodium.client.compat;
 
+import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadWinding;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.client.render.FixedColorVertexConsumer;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -120,7 +123,7 @@ public final class SinkingVertexBuilder extends FixedColorVertexConsumer {
         resetCurrentVertex();
     }
 
-    public void flush(@Nonnull ChunkModelBuilder buffers) {
+    public void flush(@Nonnull ChunkModelBuilder buffers, BlockPos origin) {
         final int numQuads = currentVertex >> 2;
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
@@ -131,41 +134,43 @@ public final class SinkingVertexBuilder extends FixedColorVertexConsumer {
         }
 
         final int byteSize = currentVertex << 5;
-        byte sideMask = 0;
 
         buffer.rewind();
 
+        final ModelVertexSink sink = buffers.getVertexSink();
+        sink.ensureCapacity(currentVertex);
+
+        chunkId = buffers.getChunkId();
+
+        IndexBufferBuilder[] builders = new IndexBufferBuilder[ModelQuadFacing.VALUES.length];
+
+        for(int i = 0; i < ModelQuadFacing.VALUES.length; i++) {
+            builders[i] = buffers.getIndexBufferBuilder(ModelQuadFacing.VALUES[i]);
+        }
+
         while (buffer.position() < byteSize) {
+            int vertexStart = sink.getVertexCount();
+
             final int normal = buffer.getInt(); // Fetch first normal for pre-selecting the vertex sink
             final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
             final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
             final int facingIdx = facing.ordinal();
 
-            chunkId = buffers.getChunkId();
-
-            final ModelVertexSink sink = buffers.getVertexSink();
-
-            writeQuadVertex(sink);
+            writeQuadVertex(sink, origin);
             buffer.getInt();
-            writeQuadVertex(sink);
+            writeQuadVertex(sink, origin);
             buffer.getInt();
-            writeQuadVertex(sink);
+            writeQuadVertex(sink, origin);
             buffer.getInt();
-            writeQuadVertex(sink);
+            writeQuadVertex(sink, origin);
 
-            sideMask |= 1 << facingIdx;
+            builders[facingIdx].add(vertexStart, ModelQuadWinding.CLOCKWISE);
         }
 
-        for (final ModelQuadFacing facing : ModelQuadFacing.VALUES) {
-            if (((sideMask >> facing.ordinal()) & 1) == 0) {
-                continue;
-            }
-
-            buffers.getVertexSink().flush();
-        }
+        sink.flush();
     }
 
-    private void writeQuadVertex(@Nonnull ModelVertexSink sink) {
+    private void writeQuadVertex(@Nonnull ModelVertexSink sink, BlockPos origin) {
         final float x = buffer.getFloat();
         final float y = buffer.getFloat();
         final float z = buffer.getFloat();
@@ -174,7 +179,7 @@ public final class SinkingVertexBuilder extends FixedColorVertexConsumer {
         final int color = buffer.getInt();
         final int light = buffer.getInt();
 
-        sink.writeVertex(x, y, z, color, u, v, light, chunkId);
+        sink.writeVertex(origin, x, y, z, color, u, v, light, chunkId);
     }
 
     private void resetCurrentVertex() {
