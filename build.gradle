@@ -11,12 +11,13 @@ loom {
 			"rubidium.compat.mixins.json"
 		]
 	}
+	mixin.defaultRefmapName = "rubidium-mixins-refmap.json"
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
+archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version}"
 version = project.mod_version
 group = project.maven_group
 
