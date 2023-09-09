@@ -18,6 +18,10 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         this(option, enumType, enumType.getEnumConstants());
     }
 
+    public CyclingControl(Option<T> option, Class<T> enumType, String[] names) {
+        this(option, enumType, toText(names));
+    }
+
     public CyclingControl(Option<T> option, Class<T> enumType, Text[] names) {
         T[] universe = enumType.getEnumConstants();
 
@@ -50,6 +54,14 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
 
             this.names[i] = name;
         }
+    }
+
+    private static Text[] toText(String[] names) {
+        Text[] textArray = new Text[names.length];
+        for (int i = 0; i < names.length; i++) {
+            textArray[i] = new LiteralText(names[i]);
+        }
+        return textArray;
     }
 
     @Override
