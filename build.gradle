@@ -7,7 +7,8 @@ loom {
     silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-			"rubidium.mixins.json"
+			"rubidium.mixins.json",
+			"rubidium.compat.mixins.json"
 		]
 	}
 }
@@ -20,6 +21,13 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+	maven {
+		name = "CTM"
+		url "https://maven.tterrag.com/"
+		content {
+			includeGroup "team.chisel.ctm"
+		}
+	}
     maven {
         name "Immersive Engineering maven"
         url "https://maven.blamejared.com"
@@ -28,13 +36,6 @@ repositories {
 		name "CodeChicken maven"
 		url "https://maven.covers1624.net/"
 	}
-	maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
 }
 
 dependencies {
@@ -43,8 +44,8 @@ dependencies {
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
 	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
-	modCompileOnly "maven.modrinth:oculus:1.18.2-1.4.3a"
 	modCompileOnly "codechicken:CodeChickenLib:1.18.2-4.1.4.488:universal"
+	modCompileOnly "team.chisel.ctm:CTM:1.18.2-1.1.5+5"
 }
 
 processResources {
