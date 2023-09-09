@@ -7,7 +7,8 @@ loom {
     silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-			"rubidium.mixins.json"
+			"rubidium.mixins.json",
+			"rubidium.compat.mixins.json"
 		]
 	}
 	mixin.defaultRefmapName = "rubidium-mixins-refmap.json"
@@ -35,6 +36,13 @@ repositories {
 			includeGroup "curse.maven"
 		}
     }
+	maven {
+		name = "CTM"
+		url "https://maven.tterrag.com/"
+		content {
+			includeGroup "team.chisel.ctm"
+		}
+	}
 }
 
 dependencies {
@@ -45,6 +53,7 @@ dependencies {
     modCompileOnly "curse.maven:flywheel-486392:${flywheel_fileid}"
     modCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
     modCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
+	modCompileOnly "team.chisel.ctm:CTM:1.19.2-1.1.7+11"
 }
 
 processResources {
