@@ -124,7 +124,7 @@ public class FluidRenderer {
 
         boolean isWater = fluidState.isIn(FluidTags.WATER);
 
-        ColorSampler<FluidState> colorizer = this.createColorProviderAdapter(world, pos, fluidState);
+        ColorSampler<FluidState> colorizer = this.createColorProviderAdapter();
 
         Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, pos, fluidState);
 
@@ -334,7 +334,7 @@ public class FluidRenderer {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (!adjBlock.isOpaque() && !adjBlock.isAir()) {
+                    if (adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
                         sprite = sprites[2];
                         if(sprite != null)
                         	isOverlay = true;
@@ -379,11 +379,8 @@ public class FluidRenderer {
         return rendered;
     }
 
-    private ColorSampler<FluidState> createColorProviderAdapter(BlockRenderView view, BlockPos pos, FluidState state) {
-    	ForgeFluidColorizerAdapter adapter = this.forgeColorProviderAdapter;
-        adapter.setHandler(view, pos, state);
-
-        return adapter;
+    private ColorSampler<FluidState> createColorProviderAdapter() {
+        return this.forgeColorProviderAdapter;
     }
 
     private void calculateQuadColors(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness,
@@ -494,19 +491,10 @@ public class FluidRenderer {
     }
 
     private static class ForgeFluidColorizerAdapter implements ColorSampler<FluidState> {
-        private BlockRenderView world;
-        private BlockPos pos;
-        private FluidState state;
-
-        public void setHandler(BlockRenderView world, BlockPos pos, FluidState state) {
-            this.world = world;
-            this.pos = pos;
-            this.state = state;
-        }
         
         @Override
         public int getColor(FluidState state, @Nullable BlockRenderView world, @Nullable BlockPos pos, int tintIndex) {
-            if (this.world == null || this.state == null) {
+            if (world == null || state == null) {
                 return -1;
             }
 
