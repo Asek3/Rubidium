@@ -30,8 +30,8 @@ public class MixinBakedQuad implements ModelQuadView {
 
     private int cachedFlags;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(int[] vertexData, int colorIndex, Direction face, Sprite sprite, boolean shade, CallbackInfo ci) {
+    @Inject(method = "<init>([IILnet/minecraft/util/math/Direction;Lnet/minecraft/client/texture/Sprite;ZZ)V", at = @At("RETURN"))
+    private void init(int[] vertexData, int colorIndex, Direction face, Sprite sprite, boolean shade, boolean hasAmbientOcclusion, CallbackInfo ci) {
         this.cachedFlags = ModelQuadFlags.getQuadFlags((BakedQuad) (Object) this);
     }
 
