@@ -14,7 +14,6 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.coderbot.iris.compat.sodium.impl.block_context.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -103,14 +102,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     	BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
                     	ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
-                    	random.setSeed(blockState.getRenderingSeed(blockPos));
+                        long seed = blockState.getRenderingSeed(blockPos);
                         for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
-                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
-                            }
-
-                            long seed = blockState.getRenderingSeed(blockPos);
-
                             if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
                                 rendered = true;
                             }
@@ -122,11 +115,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     if (!fluidState.isEmpty()) {
                         RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
 
-                        if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                            // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                            ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
-                        }
-                        
                         if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
                             rendered = true;
                         }

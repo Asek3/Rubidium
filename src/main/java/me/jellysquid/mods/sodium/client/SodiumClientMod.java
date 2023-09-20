@@ -28,7 +28,6 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
     
-    public static boolean oculusLoaded = FMLLoader.getLoadingModList().getModFileById("oculus") != null;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {

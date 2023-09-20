@@ -50,9 +50,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    modCompileOnly "curse.maven:flywheel-486392:${flywheel_fileid}"
     modCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
-    modCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
 	modCompileOnly "team.chisel.ctm:CTM:1.19.2-1.1.7+11"
 }
 
