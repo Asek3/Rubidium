@@ -11,6 +11,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.MultipartModelData;
 
+import net.minecraftforge.common.util.ConcatenatedListView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -67,7 +68,7 @@ public class MixinMultipartBakedModel {
             }
         }
 
-        List<BakedQuad> quads = new ArrayList<>();
+        List<List<BakedQuad>> quads = new ArrayList<>();
 
         long seed = random.nextLong();
 
@@ -75,10 +76,10 @@ public class MixinMultipartBakedModel {
             random.setSeed(seed);
 
             if (layer == null || model.getRenderTypes(state, random, modelData).contains(layer)) // FORGE: Only put quad data if the model is using the render type passed
-            	quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), layer));
+            	quads.add(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), layer));
         }
 
-        return quads;
+        return ConcatenatedListView.of(quads);
     }
 
 }
