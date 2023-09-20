@@ -51,7 +51,7 @@ public class CloudRenderer {
 
     private VertexBuffer vertexBuffer;
     private CloudEdges edges;
-    private Shader clouds;
+    private Shader shader;
     private final BackgroundRenderer.FogData fogData = new BackgroundRenderer.FogData(BackgroundRenderer.FogType.FOG_TERRAIN);
 
     private int prevCenterCellX, prevCenterCellY, cachedRenderDistance;
@@ -131,8 +131,6 @@ public class CloudRenderer {
         matrices.push();
 
         Matrix4f modelViewMatrix = matrices.peek().getPositionMatrix();
-        //Matrix4f.translate(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
-        // TODO
         modelViewMatrix.multiplyByTranslation(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
 
         // PASS 1: Set up depth buffer
@@ -140,7 +138,7 @@ public class CloudRenderer {
         RenderSystem.depthMask(true);
         RenderSystem.colorMask(false, false, false, false);
 
-        this.vertexBuffer.draw(modelViewMatrix, projectionMatrix, clouds);
+        this.vertexBuffer.draw(modelViewMatrix, projectionMatrix, shader);
 
         // PASS 2: Render geometry
         RenderSystem.enableBlend();
@@ -150,7 +148,7 @@ public class CloudRenderer {
         RenderSystem.depthFunc(GL30C.GL_EQUAL);
         RenderSystem.colorMask(true, true, true, true);
 
-        this.vertexBuffer.draw(modelViewMatrix, projectionMatrix, clouds);
+        this.vertexBuffer.draw(modelViewMatrix, projectionMatrix, shader);
 
         matrices.pop();
 
@@ -296,26 +294,23 @@ public class CloudRenderer {
     }
 
     public void reloadTextures(ResourceFactory factory) {
+        this.destroy();
+
         this.edges = createCloudEdges();
 
-        if (clouds != null) {
-            clouds.close();
-        }
-
         try {
-            this.clouds = new Shader(factory, "clouds", VertexFormats.POSITION_COLOR);
+            this.shader = new Shader(factory, "clouds", VertexFormats.POSITION_COLOR);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        if (this.vertexBuffer != null) {
-            this.vertexBuffer.close();
-            this.vertexBuffer = null;
         }
     }
 
     public void destroy() {
-        clouds.close();
+        if (this.shader != null) {
+            this.shader.close();
+            this.shader = null;
+        }
+
         if (this.vertexBuffer != null) {
             this.vertexBuffer.close();
             this.vertexBuffer = null;
@@ -323,19 +318,17 @@ public class CloudRenderer {
     }
 
     private static CloudEdges createCloudEdges() {
-        NativeImage nativeImage;
-
         ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
         Resource resource = resourceManager.getResource(CLOUDS_TEXTURE_ID)
                 .orElseThrow();
 
         try (InputStream inputStream = resource.getInputStream()){
-            nativeImage = NativeImage.read(inputStream);
+            try (NativeImage nativeImage = NativeImage.read(inputStream)) {
+                return new CloudEdges(nativeImage);
+            }
         } catch (IOException ex) {
             throw new RuntimeException("Failed to load texture data", ex);
         }
-
-        return new CloudEdges(nativeImage);
     }
 
     private static class CloudEdges {

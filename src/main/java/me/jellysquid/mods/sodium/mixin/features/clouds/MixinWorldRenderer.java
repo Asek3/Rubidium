@@ -44,14 +44,17 @@ public class MixinWorldRenderer {
     }
 
     @Inject(method = "reload(Lnet/minecraft/resource/ResourceManager;)V", at = @At("RETURN"))
-    private void onReload(ResourceManager manager, CallbackInfo ci) {
+    private void onReload(CallbackInfo ci) {
+        // will be re-allocated on next use
         if (this.cloudRenderer != null) {
-            this.cloudRenderer.reloadTextures(manager);
+            this.cloudRenderer.destroy();
+            this.cloudRenderer = null;
         }
     }
 
-    @Inject(method = "reload()V", at = @At("RETURN"))
-    private void onReload(CallbackInfo ci) {
+    @Inject(method = "close", at = @At("RETURN"))
+    private void onClose(CallbackInfo ci) {
+        // will never be re-allocated, as the renderer is shutting down
         if (this.cloudRenderer != null) {
             this.cloudRenderer.destroy();
             this.cloudRenderer = null;
