@@ -4,11 +4,10 @@ plugins {
 }
 
 loom {
-    silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-			"rubidium.mixins.json",
-			"rubidium.compat.mixins.json"
+				"rubidium.mixins.json",
+				"rubidium.compat.mixins.json"
 		]
 	}
 	mixin.defaultRefmapName = "rubidium-mixins-refmap.json"
@@ -22,20 +21,17 @@ version = project.mod_version
 group = project.maven_group
 
 configurations {
-    modIncludeImplementation
+	modIncludeImplementation
 
-    include.extendsFrom modIncludeImplementation
-    modImplementation.extendsFrom modIncludeImplementation
+	include.extendsFrom modIncludeImplementation
+	modImplementation.extendsFrom modIncludeImplementation
 }
 
 repositories {
-    maven{
-        // curseforge
-        url "https://www.cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-    }
+	maven {
+		name "Immersive Engineering maven"
+		url "https://maven.blamejared.com"
+	}
 	maven {
 		name = "CTM"
 		url "https://maven.tterrag.com/"
@@ -50,7 +46,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    modCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
+	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.19.2-9.2.2-165"
 	modCompileOnly "team.chisel.ctm:CTM:1.19.2-1.1.7+11"
 }
 
@@ -58,8 +54,8 @@ processResources {
 	inputs.property "version", project.version
 
 	filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
+		expand "version": project.version
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
