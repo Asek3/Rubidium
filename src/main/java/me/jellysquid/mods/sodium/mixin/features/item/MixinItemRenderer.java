@@ -91,6 +91,7 @@ public class MixinItemRenderer {
 
             for (int i = 0; i < 4; i++) {
                 int fColor = multABGRInts(quad.getColor(i), color);
+                light = ModelQuadUtil.applyBakedLighting(quad.getLight(i), light);
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
