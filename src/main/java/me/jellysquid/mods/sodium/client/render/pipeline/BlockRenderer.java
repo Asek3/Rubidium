@@ -107,9 +107,8 @@ public class BlockRenderer {
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuad quad = quads.get(i);
 
-            LightPipeline quadLighter = !quad.hasAmbientOcclusion() ? this.lighters.getLighter(LightMode.FLAT) : lighter;
             QuadLightData light = this.cachedQuadLightData;
-            quadLighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getFace(), quad.hasShade());
+            lighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getFace(), quad.hasShade());
 
             if (quad.hasColor() && colorizer == null) {
                 colorizer = this.blockColors.getColorProvider(state);
