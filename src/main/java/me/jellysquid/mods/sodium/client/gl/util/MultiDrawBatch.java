@@ -155,7 +155,7 @@ public interface MultiDrawBatch {
                 throw new BufferUnderflowException();
             }
 
-            MemoryUtil.memPutLong(this.bufPointerAddr, pointer);
+            MemoryUtil.memPutAddress(this.bufPointerAddr, pointer);
             this.bufPointerAddr += Pointer.POINTER_SIZE;
 
             MemoryUtil.memPutInt(this.bufCountAddr, count);
