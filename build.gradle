@@ -33,6 +33,10 @@ repositories {
 		url "https://maven.blamejared.com"
 	}
 	maven {
+		name "CodeChicken maven"
+		url "https://maven.covers1624.net/"
+	}
+	maven {
 		name = "CTM"
 		url "https://maven.tterrag.com/"
 		content {
@@ -48,6 +52,7 @@ dependencies {
 
 	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.19.2-9.2.2-165"
 	modCompileOnly "team.chisel.ctm:CTM:1.19.2-1.1.7+11"
+	modCompileOnly "codechicken:CodeChickenLib:1.19.2-4.3.1.481:universal"
 }
 
 processResources {
